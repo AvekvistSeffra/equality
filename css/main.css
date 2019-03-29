@@ -1,0 +1,165 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	color: #FAFAFA;
+	background-color: #212121;
+	font-family: 'Raleway', sans-serif;
+}
+
+#outer-nav {
+	top: 0;
+	width: 100%;
+	z-index: 1;
+	position: fixed;
+	background-color: #FAFAFA;
+}
+
+#nav-handle {
+	text-align: center;
+	font-family: 'Raleway';
+	color: rgba(0, 0, 0, 0.54);
+	cursor: pointer;
+	width: 10%;
+	display: inline-block;
+}
+
+#nav-button-bar1, #nav-button-bar2, #nav-button-bar3 {
+  width: 49px;
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.54);;
+  margin: 8px auto;
+  transition: 0.4s;
+}
+
+#nav-button-bar1 .active-nav {
+  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+  transform: rotate(-45deg) translate(-9px, 6px) ;
+}
+
+#nav-button-bar2 .active-nav {
+  opacity: 0;
+}
+
+#nav-button-bar3 .active-nav  {
+  -webkit-transform: rotate(45deg) translate(-8px, -8px);
+  transform: rotate(45deg) translate(-8px, -8px);
+}
+
+#inner-nav {
+	width: 50%;
+	height: 0;
+	z-index:2;
+	background-color: #FAFAFA;
+	position: fixed;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+#inner-nav a {
+	font-size: 3em;
+	color: #333;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+#inner-nav a:hover {
+	text-decoration: underline;
+}
+
+#outer-nav div {
+	font-size: 4em;
+	color: #fafafa;
+}
+
+header {
+	margin-top: 2vh;
+}
+
+header h1 {
+	margin: 0 auto;
+	margin-top: 30vh;
+	
+	text-align: center;
+	font-size: 5em;
+}
+
+.button {
+	margin: 2vh auto 0 auto;
+	padding: 14px 25px;
+	
+	font-size: 2rem;
+	
+	color: rgba(0, 0, 0, 0.7);
+	text-decoration: none;
+	border-radius: 100px;
+	background-color: #FAFAFA;
+}
+
+.button:hover {
+	background-color: #EAEAEA;
+}
+
+#header-nav {
+	display: grid;
+	grid-row-gap: 2vh;
+	grid-template-areas: 
+		". . precise . ."
+		". . . . ."
+		". performant . expressive .";
+}
+
+#precise-button {
+	grid-area: precise;
+}
+
+#performant-button {
+	grid-area: performant;
+}
+
+#expressive-button {
+	grid-area: expressive;
+}
+
+header, main section {
+	height: 100vh;
+}
+
+section h2 {
+	margin: 0;
+	padding: 0;
+	padding-top: 2vh;
+	font-size: 2rem;
+}
+
+#precise {
+	background-color: #313131;
+}
+
+#performant {
+	background-color: #626262;
+}
+
+#expressive {
+	background-color: #939393;
+}
+
+footer {
+	margin: 0 auto;
+	margin-bottom: 2vh;
+	width: 30%;
+}
+
+@media screen and (max-width: 640px) {
+	#header-nav {
+		grid-template-areas: 
+			"precise"
+			"performant"
+			"expressive";
+	}
+	
+	#inner-nav {
+		width: 60%;
+	}
+}
