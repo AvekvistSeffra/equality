@@ -63,30 +63,35 @@
 					<section class="text" id="precise-text">
 						<p>
 							If you compare the different implementations of algebra in <i>equality</i><br>
-							one can see that one is using <span class="type">f64</span>'s and the other one is <br>
-							using <span class="type">Expression</span>'s. This difference is to offer performance or <br>
-							precision, as well as exposing this capability to the developer. 
+							one can see that one is using <span class="type">f64</span>s and the other one is <br>
+							using <span class="type">Expression</span>s. This difference is to offer performance or <br>
+							precision, and it's directly exposed as a capability to the developer. 
 						</p>
 						<p>
-							
+							A math library can't claim that it is performant if it doesn't implement SIMD, <br>
+							so lucky you (and us) that <i>equality</i> does! Every calculation in a Vector4, <br>
+							for example, is always blazingly fast and correct. 
+						</p>
+						<p>
+							This allows <i>equality</i> to be used in real-time simulations and as a way to <br>
+							save a few bucks if you want to compute stuff on a web server that costs <br>
+							per calculation. 
 						</p>
 					</section>
 					<section class="code" id="precise-code">
 						<p>
-							<span class="keyword">let</span> expr1 = <span class="type">Expression</span>::<span class="function">from</span>(3);<br>
-							<span class="keyword">let</span> expr2 = <span class="type">Expression</span>::<span class="function">from</span>(2);<br>
-							<span class="keyword">let</span> expr3 = expr1 + expr2; <span class="comment">// addition</span><br>
+							<span class="keyword">let</span> expr_vector1 = <span class="type">precise::Vector2</span>::<span class="function">from</span>((3, 2));<br>
+							<span class="keyword">let</span> expr_vector2 = <span class="type">precise::Vector2</span>::<span class="function">from</span>((2, 5));<br>
+							<span class="keyword">let</span> f64_vector1 = <span class="type">performant::Vector2</span>::<span class="function">from</span>((2, 2));<br>
+							<span class="keyword">let</span> f64_vector2 = <span class="type">performant::Vector2</span>::<span class="function">from</span>((2, 7));<br>
 							<br>
 							<span class="comment">// prints out "(3 + 2) = 5"</span><br>
 							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr3, expr3.<span class="function">evaluate</span>());
 							<br>
 							<br>
-							<span class="keyword">let</span> expr4 = <span class="type">Expression</span>::<span class="function">from</span>(15);<br>
-							<span class="keyword">let</span> expr5 = <span class="type">Expression</span>::<span class="function">from</span>(61);<br>
-							<span class="keyword">let</span> expr6 = expr3 * (expr4 / expr5);<br>
-							<br>
-							<span class="comment">// prints out "((3 + 2) * (15 / 61)) = 1.2295081967213115"</span><br>
-							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr6, expr6.<span class="function">evaluate</span>());
+							<span class="comment">// these both utilize SIMD at full capacity</span><br>
+							<span class="keyword">let</span> added_vector1 = expr_vector1 + expr_vector2; <br>
+							<span class="keyword">let</span> added_vector2 = f64_vector1 + f64_vector2; <br>
 						</p>
 					</section>
 				</div>
@@ -96,40 +101,41 @@
 				<div class="divisor" id="expressive-divisor">
 					<section class="text" id="precise-text">
 						<p>
-							When using <span>equality</span>, you can be safe knowing that <br>
-							your code is as precise as floating-point precision should be. 
+							Just like <i>Rust</i> is safe, <i>equality</i> is expressive. <br>
+							For the developer, this means that you can write meaningful<br>
+							mathematical expressions and easily get them right withouth<br>
+							having to fight with some order of operations. 
 						</p>
 						<p>
-							Whatever calculation you want to perform, generate them through<br>
-							the Expression type and when you finally want the result, just <br>
-							utilize the <span class="function">evaluate</span>() function. It'll return a <span class="type">f64</span> (or <span class="type">Double</span><br>
-							in C/C++ and Java lingo. )
+							And with a built-in arithmetic parser, <i>equality</i> can<br>
+							easily load expressions from a file, compute them and give<br>
+							the results back to you. Perfect as a back-end for a GeoGebra<br>
+							competitor. 
 						</p>
 					</section>
 					<section class="code" id="precise-code">
 						<p>
-							<span class="keyword">let</span> expr1 = <span class="type">Expression</span>::<span class="function">from</span>(3);<br>
-							<span class="keyword">let</span> expr2 = <span class="type">Expression</span>::<span class="function">from</span>(2);<br>
-							<span class="keyword">let</span> expr3 = expr1 + expr2; <span class="comment">// addition</span><br>
+							<span class="keyword">let</span> expr1 = <span class="type">Expression</span>::<span class="function">from</span>(<span class="string">"2 + 3"</span>);<br>
+							<span class="keyword">let</span> expr2 = <span class="type">Expression</span>::<span class="function">from</span>(<span class="string">"4 * (2 + 3)"</span>);<br>
+							<span class="keyword">let</span> expr3 = expr1 / expr2; <span class="comment">// division</span><br>
 							<br>
-							<span class="comment">// prints out "(3 + 2) = 5"</span><br>
+							<span class="comment">// prints out "((2 + 3) / (4 * (2 + 3))) = 0.25"</span><br>
 							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr3, expr3.<span class="function">evaluate</span>());
-							<br>
-							<br>
-							<span class="keyword">let</span> expr4 = <span class="type">Expression</span>::<span class="function">from</span>(15);<br>
-							<span class="keyword">let</span> expr5 = <span class="type">Expression</span>::<span class="function">from</span>(61);<br>
-							<span class="keyword">let</span> expr6 = expr3 * (expr4 / expr5);<br>
-							<br>
-							<span class="comment">// prints out "((3 + 2) * (15 / 61)) = 1.2295081967213115"</span><br>
-							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr6, expr6.<span class="function">evaluate</span>());
 						</p>
 					</section>
 				</div>
 			</section>
 			<section class="area" id="about">
 				<h2>About</h2>
-				<p>Equality is an expressive, robust and fast math library for the Rust programming language and is used in the Titanium game engine. </p>
+				<p>Let's get serious. <i>equality</i> is a high-performance library for mathematics, capable of solving equations like a human would as well as guess the solutions and try to perform better. </p>
+				<p>It's a library that allows a developer to implement precise matrices to be used in machine learning, projections and more. </p>
+				<p>And the matrices have their vector friends, making it the ideal library for AI. </p>
+				<p>
+					Note: the library is only slightly implemented so far and most of the enticing features are yet to come. Look out for <br>
+					new versions by joining our mailing lists down below. 
+				</p>
 				<form method="post" action="#">
+					<hr>
 					<p>Join our mailing lists for the latest information</p>
 					<input id="email-form" type="text" name="email" /><br>
 					<input id="email-form-submit" type="submit" value="Join" disabled />

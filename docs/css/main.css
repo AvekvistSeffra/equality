@@ -123,7 +123,7 @@ header h1 {
 }
 
 header, main .area {
-	min-height: 100vh;
+	min-height: 95vh;
 }
 
 .area h2 {
@@ -166,7 +166,7 @@ header, main .area {
 
 #about {
 	margin: auto;
-	width: 90%;
+	width: 70%;
 }
 
 #links {
@@ -212,7 +212,7 @@ header, main .area {
 }
 
 .type {
-	color: rgba(173, 61, 212, 1);
+	color: rgb(210, 132, 236);
 }
 
 .function {
