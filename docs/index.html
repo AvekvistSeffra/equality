@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		
+
 		<title>Equality</title>
 		
 		<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" />
@@ -80,8 +80,9 @@
 				<p>Equality is an expressive, robust and fast math library for the Rust programming language and is used in the Titanium game engine. </p>
 				<form method="post" action="#">
 					<p>Join our mailing lists for the latest information</p>
-					<input type="text" name="email" />
-					<input type="submit" value="Join" />
+					<input id="email-form" type="text" name="email" /><br>
+					<input id="email-form-submit" type="submit" value="Join" />
+					<p id="validator-text"></p>
 				</form>
 			</section>
 			<section class="area" id="links">
@@ -96,5 +97,6 @@
 		
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<script src="js/navbar.js"></script>
+		<script src="js/validate_form.js"></script>
 	</body>
 </html>

@@ -153,6 +153,11 @@ header, main .area {
 	background-color: #454545;
 }
 
+#about {
+	margin: auto;
+	width: 90%;
+}
+
 #links {
 	background-color: #545454;
 }
@@ -198,6 +203,28 @@ header, main .area {
 
 .string {
 	color: rgba(67, 127, 59, 1);
+}
+
+#email-form {
+	padding: 0.2rem 3rem;
+	border: none;
+	font-size: 2rem;
+	font-family: 'Source Code Pro', monospace;
+	text-align: center;
+}
+
+#email-form-submit {
+	margin: 12px;
+	border: none;
+	height: 2rem;
+	width: 10rem;
+	border-radius: 50px;
+	background-color: #E1E1E1;
+	cursor: pointer;
+}
+
+#email-form-submit:hover {
+	background-color: #FBFBFB;
 }
 
 footer {
