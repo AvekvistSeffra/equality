@@ -40,7 +40,7 @@ var initialize = function() {
 var toggleNavBar = function() {
 	var height = "60vh";
 	if($(window).width() < 640)
-		height = "80vh";
+		height = "100vh";
 	
 	if($("#inner-nav").css("height") == "0px") {
 		$("#inner-nav").animate({
