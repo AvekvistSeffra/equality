@@ -20,7 +20,7 @@ var navString = `
 			<a id="nav-expressive-button" class="nav-button">expressive</a>
 			<a id="nav-about-button" class="nav-button">about</a>
 			<a id="nav-links-button" class="nav-button">links</a>
-			<a id="nav-bottom-button" class="nav-button">bottom</a>
+			<a id="nav-bottom-button" class="nav-button">copyright</a>
 		</nav>`;
 
 var initialize = function() {

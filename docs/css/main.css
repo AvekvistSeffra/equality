@@ -122,15 +122,23 @@ header h1 {
 	grid-area: expressive;
 }
 
-header, main section {
+header, main .area {
 	height: 100vh;
 }
 
-section h2 {
+.area h2 {
+	grid-area: title;
 	margin: 0;
 	padding: 0;
 	padding-top: 2vh;
 	font-size: 2rem;
+}
+
+.divisor {
+	padding: 2%;
+	display: grid;
+	grid-template-areas: 
+		"text code";
 }
 
 #precise {
@@ -142,7 +150,54 @@ section h2 {
 }
 
 #expressive {
-	background-color: #939393;
+	background-color: #454545;
+}
+
+#links {
+	background-color: #545454;
+}
+
+.text {
+	grid-area: text;
+}
+
+.code {
+	grid-area: code;
+	font-family: 'Source Code Pro', monospace;
+
+	background-color: rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+	box-shadow: 1px 1px 4px 4px rgba(0, 0, 0, 0.2);
+}
+
+.code p {
+	margin: 12px;
+	padding: 12px;
+	text-align: left;
+}
+
+.comment {
+	color: #818181;
+}
+
+.keyword {
+	color: rgba(63, 91, 193, 1);
+}
+
+.type {
+	color: rgba(173, 61, 212, 1);
+}
+
+.function {
+	color: rgba(197, 163, 31, 1);
+}
+
+.macro {
+	color: rgba(133, 152, 12, 1);
+}
+
+.string {
+	color: rgba(67, 127, 59, 1);
 }
 
 footer {
@@ -161,5 +216,11 @@ footer {
 	
 	#inner-nav {
 		width: 60%;
+	}
+	
+	.divisor {
+		grid-template-areas: 
+			"text"
+			"code";
 	}
 }
