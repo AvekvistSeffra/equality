@@ -24,7 +24,76 @@
 		<main>
 			<section class="area" id="precise">
 				<h2>Precise</h2>
-				<div class="divisor">
+				<div class="divisor" id="precise-divisor">
+					<section class="text" id="precise-text">
+						<p>
+							When using <i>equality</i>, you can be safe knowing that <br>
+							your code is as precise as floating-point precision should be. 
+						</p>
+						<p>
+							Whatever calculation you want to perform, generate them through<br>
+							the Expression type and when you finally want the result, just <br>
+							utilize the <span class="function">evaluate</span>() function. It'll return a <span class="type">f64</span> (or <span class="type">Double</span><br>
+							in C/C++ and Java lingo. )
+						</p>
+					</section>
+					<section class="code" id="precise-code">
+						<p>
+							<span class="keyword">let</span> expr1 = <span class="type">Expression</span>::<span class="function">from</span>(3);<br>
+							<span class="keyword">let</span> expr2 = <span class="type">Expression</span>::<span class="function">from</span>(2);<br>
+							<span class="keyword">let</span> expr3 = expr1 + expr2; <span class="comment">// addition</span><br>
+							<br>
+							<span class="comment">// prints out "(3 + 2) = 5"</span><br>
+							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr3, expr3.<span class="function">evaluate</span>());
+							<br>
+							<br>
+							<span class="keyword">let</span> expr4 = <span class="type">Expression</span>::<span class="function">from</span>(15);<br>
+							<span class="keyword">let</span> expr5 = <span class="type">Expression</span>::<span class="function">from</span>(61);<br>
+							<span class="keyword">let</span> expr6 = expr3 * (expr4 / expr5);<br>
+							<br>
+							<span class="comment">// prints out "((3 + 2) * (15 / 61)) = 1.2295081967213115"</span><br>
+							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr6, expr6.<span class="function">evaluate</span>());
+						</p>
+					</section>
+				</div>
+			</section>
+			<section class="area" id="performant">
+				<h2>Performant</h2>
+				<div class="divisor" id="performant-divisor">
+					<section class="text" id="precise-text">
+						<p>
+							If you compare the different implementations of algebra in <i>equality</i><br>
+							one can see that one is using <span class="type">f64</span>'s and the other one is <br>
+							using <span class="type">Expression</span>'s. This difference is to offer performance or <br>
+							precision, as well as exposing this capability to the developer. 
+						</p>
+						<p>
+							
+						</p>
+					</section>
+					<section class="code" id="precise-code">
+						<p>
+							<span class="keyword">let</span> expr1 = <span class="type">Expression</span>::<span class="function">from</span>(3);<br>
+							<span class="keyword">let</span> expr2 = <span class="type">Expression</span>::<span class="function">from</span>(2);<br>
+							<span class="keyword">let</span> expr3 = expr1 + expr2; <span class="comment">// addition</span><br>
+							<br>
+							<span class="comment">// prints out "(3 + 2) = 5"</span><br>
+							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr3, expr3.<span class="function">evaluate</span>());
+							<br>
+							<br>
+							<span class="keyword">let</span> expr4 = <span class="type">Expression</span>::<span class="function">from</span>(15);<br>
+							<span class="keyword">let</span> expr5 = <span class="type">Expression</span>::<span class="function">from</span>(61);<br>
+							<span class="keyword">let</span> expr6 = expr3 * (expr4 / expr5);<br>
+							<br>
+							<span class="comment">// prints out "((3 + 2) * (15 / 61)) = 1.2295081967213115"</span><br>
+							<span class="macro">println!</span>(<span class="string">"{} = {}"</span>, expr6, expr6.<span class="function">evaluate</span>());
+						</p>
+					</section>
+				</div>
+			</section>
+			<section class="area" id="expressive">
+				<h2>Expressive</h2>
+				<div class="divisor" id="expressive-divisor">
 					<section class="text" id="precise-text">
 						<p>
 							When using <span>equality</span>, you can be safe knowing that <br>
@@ -57,39 +126,26 @@
 					</section>
 				</div>
 			</section>
-			<section class="area" id="performant">
-				<h2>Performant</h2>
-				<section class="code" id="performant-code">
-					
-				</section>
-				<section class="text" id="performant-text">
-
-				</section>
-			</section>
-			<section class="area" id="expressive">
-				<h2>Expressive</h2>
-				<section class="code" id="expressive-code">
-					
-				</section>
-				<section class="text" id="expressive-text">
-
-				</section>
-			</section>
 			<section class="area" id="about">
 				<h2>About</h2>
 				<p>Equality is an expressive, robust and fast math library for the Rust programming language and is used in the Titanium game engine. </p>
 				<form method="post" action="#">
 					<p>Join our mailing lists for the latest information</p>
 					<input id="email-form" type="text" name="email" /><br>
-					<input id="email-form-submit" type="submit" value="Join" />
-					<p id="validator-text"></p>
+					<input id="email-form-submit" type="submit" value="Join" disabled />
 				</form>
-			</section>
-			<section class="area" id="links">
 				<h2>Links</h2>
+				<div id="links">
+					<a href="https://github.com/AvekvistSeffra/equality">equality on GitHub</a>
+					<a href="https://crates.io/crates/equality">equality on crates.io</a>
+					<a href="https://avekvistseffra.github.io/">AvekvistSeffra</a>
+					<a href="https://avekvistseffra.github.io/titanium">Titanium Website</a>
+					<a href="https://github.com/AvekvistSeffra/titanium">Titanium on GitHub</a>
+				</div>
 			</section>
 		</main>
 		<footer id="footer">
+			<img src="https://avekvistseffra.github.io/images/equality.png" alt="equality logo" />
 			<p>
 				&copy; Avekvist 2019. All rights reserved. 
 			</p>

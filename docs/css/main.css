@@ -123,7 +123,7 @@ header h1 {
 }
 
 header, main .area {
-	height: 100vh;
+	min-height: 100vh;
 }
 
 .area h2 {
@@ -141,12 +141,23 @@ header, main .area {
 		"text code";
 }
 
+#performant-divisor {
+	grid-template-areas:
+		"code text";
+}
+
+#expressive-divisor {
+	grid-template-areas:
+		"text"
+		"code";
+}
+
 #precise {
 	background-color: #313131;
 }
 
 #performant {
-	background-color: #626262;
+	background-color: #525252;
 }
 
 #expressive {
@@ -159,7 +170,18 @@ header, main .area {
 }
 
 #links {
-	background-color: #545454;
+	font-size: 1.5rem;
+	display: flex;
+	flex-direction: column;
+}
+
+#links a {
+	padding: 3px 20px 8px;
+	color: #FAFAFA;
+}
+
+#links a:hover {
+	background-color: rgba(0, 0, 0, 0.1);
 }
 
 .text {
@@ -227,6 +249,11 @@ header, main .area {
 	background-color: #FBFBFB;
 }
 
+#email-form-submit:disabled {
+	background-color: #CACACA;
+	cursor: initial;
+}
+
 footer {
 	margin: 0 auto;
 	margin-bottom: 2vh;
@@ -247,7 +274,7 @@ footer {
 		left: 0;
 	}
 	
-	.divisor {
+	.divisor, #performant-divisor {
 		grid-template-areas: 
 			"text"
 			"code";
