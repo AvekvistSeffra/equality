@@ -57,7 +57,7 @@ var toggleNavBar = function() {
 	// the height of the navbar changes. 
 	var height = "60vh";
 	if($(window).width() < 640)
-		height = "150vh";
+		height = "100vh";
 	
 	// Depending on the height of the navbar,
 	// it sets the height and animation. 
