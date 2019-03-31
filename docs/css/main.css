@@ -261,6 +261,10 @@ footer {
 	width: 30%;
 }
 
+footer img {
+	margin: auto;
+}
+
 @media screen and (max-width: 640px) {
 	#header-nav {
 		grid-template-areas: 
