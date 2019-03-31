@@ -33,14 +33,14 @@ var initialize = function() {
 		$("#inner-nav").css("top", $("#outer-nav").height());
 		$("#inner-nav").css("right", $(document).width() / 2 - $("#inner-nav").width() / 2);
 	}
-	
+
 	navHeight = $("#outer-nav").height();
 }
 
 var toggleNavBar = function() {
 	var height = "60vh";
 	if($(window).width() < 640)
-		height = "60vh";
+		height = "80vh";
 	
 	if($("#inner-nav").css("height") == "0px") {
 		$("#inner-nav").animate({
