@@ -4,4 +4,7 @@ version = "0.1.0"
 authors = ["Hampus Avekvist <hampus@avekvist.com>"]
 edition = "2018"
 
+description = "equality is a precise, performant and expressive math library for Rust. "
+license = "MIT"
+
 [dependencies]
