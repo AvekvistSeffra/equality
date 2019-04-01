@@ -14,9 +14,61 @@ pub enum Operation {
     Exponent,
 }
 
+impl From<i16> for Operation {
+    fn from(value: i16) -> Self {
+        Operation::Value(value as i32)
+    }
+}
+
 impl From<i32> for Operation {
     fn from(value: i32) -> Self {
         Operation::Value(value)
+    }
+}
+
+impl PartialEq for Operation {
+    fn eq(&self, rhs: &Self) -> bool {
+        if let Operation::Value(x) = self {
+            if let Operation::Value(y) = rhs {
+                x == y
+            } else {
+                false
+            }
+        } else {
+            match self {
+                Operation::Addition => {
+                    match rhs {
+                        Operation::Addition => true,
+                        _ => false,
+                    }
+                },
+                Operation::Subtraction => {
+                    match rhs {
+                        Operation::Subtraction => true,
+                        _ => false,
+                    }
+                },
+                Operation::Multiplication => {
+                    match rhs {
+                        Operation::Multiplication => true,
+                        _ => false,
+                    }
+                },
+                Operation::Division => {
+                    match rhs {
+                        Operation::Division => true,
+                        _ => false,
+                    }
+                },
+                Operation::Modulus => {
+                    match rhs {
+                        Operation::Modulus => true,
+                        _ => false,
+                    }
+                },
+                _ => false,
+            }
+        }
     }
 }
 
@@ -28,14 +80,6 @@ pub struct Expression {
 }
 
 impl Expression {
-    pub fn value(value: i32) -> Expression {
-        Expression {
-            operation: Operation::Value(value),
-            lhs: None,
-            rhs: None,
-        }
-    }
-
     pub fn evaluate(&self) -> f64 {
         match self.operation {
             Operation::Value(x) => x as f64,
@@ -121,6 +165,42 @@ impl Add for Expression {
     }
 }
 
+impl Add for &Expression {
+    type Output = Expression;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Expression {
+            operation: Operation::Addition,
+            lhs: Some(Box::new(self.clone())),
+            rhs: Some(Box::new(rhs.clone())),
+        }
+    }
+}
+
+impl Add<Expression> for &Expression {
+    type Output = Expression;
+
+    fn add(self, rhs: Expression) -> Self::Output {
+        Expression {
+            operation: Operation::Addition,
+            lhs: Some(Box::new(self.clone())),
+            rhs: Some(Box::new(rhs)),
+        }
+    }
+}
+
+impl Add<&Expression> for Expression {
+    type Output = Self;
+
+    fn add(self, rhs: &Expression) -> Self::Output {
+        Expression {
+            operation: Operation::Addition,
+            lhs: Some(Box::new(self)),
+            rhs: Some(Box::new(rhs.clone())),
+        }
+    }
+}
+
 impl Sub for Expression {
     type Output = Self;
 
@@ -133,6 +213,42 @@ impl Sub for Expression {
     }
 }
 
+impl Sub for &Expression {
+    type Output = Expression;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Expression {
+            operation: Operation::Subtraction,
+            lhs: Some(Box::new(self.clone())),
+            rhs: Some(Box::new(rhs.clone())),
+        }
+    }
+}
+
+impl Sub<Expression> for &Expression {
+    type Output = Expression;
+
+    fn sub(self, rhs: Expression) -> Self::Output {
+        Expression {
+            operation: Operation::Subtraction,
+            lhs: Some(Box::new(self.clone())),
+            rhs: Some(Box::new(rhs)),
+        }
+    }
+}
+
+impl Sub<&Expression> for Expression {
+    type Output = Self;
+
+    fn sub(self, rhs: &Expression) -> Self::Output {
+        Expression {
+            operation: Operation::Subtraction,
+            lhs: Some(Box::new(self)),
+            rhs: Some(Box::new(rhs.clone())),
+        }
+    }
+}
+
 impl Mul for Expression {
     type Output = Self;
 
@@ -141,6 +257,42 @@ impl Mul for Expression {
             operation: Operation::Multiplication,
             lhs: Some(Box::new(self)),
             rhs: Some(Box::new(rhs)),
+        }
+    }
+}
+
+impl Mul for &Expression {
+    type Output = Expression;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Expression {
+            operation: Operation::Multiplication,
+            lhs: Some(Box::new(self.clone())),
+            rhs: Some(Box::new(rhs.clone())),
+        }
+    }
+}
+
+impl Mul<Expression> for &Expression {
+    type Output = Expression;
+
+    fn mul(self, rhs: Expression) -> Self::Output {
+        Expression {
+            operation: Operation::Multiplication,
+            lhs: Some(Box::new(self.clone())),
+            rhs: Some(Box::new(rhs)),
+        }
+    }
+}
+
+impl Mul<&Expression> for Expression {
+    type Output = Self;
+
+    fn mul(self, rhs: &Self) -> Self::Output {
+        Expression {
+            operation: Operation::Multiplication,
+            lhs: Some(Box::new(self)),
+            rhs: Some(Box::new(rhs.clone())),
         }
     }
 }
@@ -188,7 +340,7 @@ impl BitXor<i32> for Expression {
         Expression {
             operation: Operation::Exponent,
             lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(Expression::value(rhs))),
+            rhs: Some(Box::new(Expression::from(rhs))),
         }
     }
 }
@@ -206,8 +358,8 @@ impl BitXor<f32> for Expression {
             lhs: Some(Box::new(self)),
             rhs: Some(Box::new(Expression {
                 operation: Operation::Division,
-                lhs: Some(Box::new(Expression::value(rhs / gcd))),
-                rhs: Some(Box::new(Expression::value(denominator / gcd))),
+                lhs: Some(Box::new(Expression::from(rhs / gcd))),
+                rhs: Some(Box::new(Expression::from(denominator / gcd))),
             })),
         }
     }
@@ -215,13 +367,17 @@ impl BitXor<f32> for Expression {
 
 impl From<i16> for Expression {
     fn from(value: i16) -> Self {
-        Expression::value(value as i32)
+        Expression::from(value as i32)
     }
 }
 
 impl From<i32> for Expression {
     fn from(value: i32) -> Self {
-        Expression::value(value)
+        Expression {
+            operation: Operation::Value(value),
+            lhs: None,
+            rhs: None,
+        }
     }
 }
 
@@ -233,8 +389,8 @@ impl From<f32> for Expression {
 
         Expression {
             operation: Operation::Division,
-            lhs: Some(Box::new(Expression::value(value / gcd))),
-            rhs: Some(Box::new(Expression::value(denominator / gcd))),
+            lhs: Some(Box::new(Expression::from(value / gcd))),
+            rhs: Some(Box::new(Expression::from(denominator / gcd))),
         }
     }
 }
@@ -247,8 +403,8 @@ impl From<f64> for Expression {
 
         Expression {
             operation: Operation::Division,
-            lhs: Some(Box::new(Expression::value(value / gcd))),
-            rhs: Some(Box::new(Expression::value(denominator / gcd))),
+            lhs: Some(Box::new(Expression::from(value / gcd))),
+            rhs: Some(Box::new(Expression::from(denominator / gcd))),
         }
     }
 }
@@ -285,6 +441,18 @@ impl Ord for Expression {
 
 impl PartialEq for Expression {
     fn eq(&self, rhs: &Self) -> bool {
+        self.evaluate() == rhs.evaluate()
+    }
+}
+
+impl PartialEq<Expression> for &Expression {
+    fn eq(&self, rhs: &Expression) -> bool {
+        self.evaluate() == rhs.evaluate()
+    }
+}
+
+impl PartialEq<&Expression> for Expression {
+    fn eq(&self, rhs: &&Expression) -> bool {
         self.evaluate() == rhs.evaluate()
     }
 }
@@ -394,8 +562,195 @@ mod operation_tests {
     use super::Operation;
 
     #[test]
-    fn from() {
-        
+    fn from_i16() {
+        let result = Operation::from(3_i16);
+        let expected_result = Operation::Value(3_i32);
+
+        assert_eq!(result, expected_result);
+    }
+
+    #[test]
+    fn from_i32() {
+        let result = Operation::from(3_i32);
+        let expected_result = Operation::Value(3_i32);
+
+        assert_eq!(result, expected_result);
+    }
+
+    #[test]
+    fn eq_value_value() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::from(0);
+
+        assert_eq!(op1, op2);
+    }
+
+    #[test]
+    fn ne_value_value() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::from(1);
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_value_addition() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::Addition;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_value_subtraction() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::Subtraction;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_value_multiplication() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::Multiplication;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_value_division() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::Division;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_value_modulus() {
+        let op1 = Operation::from(0);
+        let op2 = Operation::Modulus;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn eq_addition_addition() {
+        let op1 = Operation::Addition;
+        let op2 = Operation::Addition;
+
+        assert_eq!(op1, op2);
+    }
+
+    #[test]
+    fn ne_addition_subtraction() {
+        let op1 = Operation::Addition;
+        let op2 = Operation::Subtraction;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_addition_multiplication() {
+        let op1 = Operation::Addition;
+        let op2 = Operation::Multiplication;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_addition_division() {
+        let op1 = Operation::Addition;
+        let op2 = Operation::Division;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_addition_modulus() {
+        let op1 = Operation::Addition;
+        let op2 = Operation::Modulus;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn eq_subtraction_subtraction() {
+        let op1 = Operation::Subtraction;
+        let op2 = Operation::Subtraction;
+
+        assert_eq!(op1, op2);
+    }
+
+    #[test]
+    fn ne_subtraction_multiplication() {
+        let op1 = Operation::Subtraction;
+        let op2 = Operation::Multiplication;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_subtraction_division() {
+        let op1 = Operation::Subtraction;
+        let op2 = Operation::Division;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_subtraction_modulus() {
+        let op1 = Operation::Subtraction;
+        let op2 = Operation::Modulus;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn eq_multiplication_multiplication() {
+        let op1 = Operation::Multiplication;
+        let op2 = Operation::Multiplication;
+
+        assert_eq!(op1, op2);
+    }
+
+    #[test]
+    fn ne_multiplication_division() {
+        let op1 = Operation::Multiplication;
+        let op2 = Operation::Division;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn ne_multiplication_modulus() {
+        let op1 = Operation::Multiplication;
+        let op2 = Operation::Modulus;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn eq_division_division() {
+        let op1 = Operation::Division;
+        let op2 = Operation::Division;
+
+        assert_eq!(op1, op2);
+    }
+
+    #[test]
+    fn ne_division_modulus() {
+        let op1 = Operation::Division;
+        let op2 = Operation::Modulus;
+
+        assert_ne!(op1, op2);
+    }
+
+    #[test]
+    fn eq_modulus_modulus() {
+        let op1 = Operation::Modulus;
+        let op2 = Operation::Modulus;
+
+        assert_eq!(op1, op2);
     }
 }
 
@@ -406,27 +761,50 @@ mod expr_tests {
 
     #[test]
     fn from_i16() {
-        
+        let result = Expression::from(3_i16);
+        let expected_result = Expression {
+            operation: Operation::Value(3),
+            lhs: None,
+            rhs: None,
+        };
+
+        assert_eq!(result, expected_result);
     }
 
     #[test]
     fn from_i32() {
+        let result = Expression::from(3_i32);
+        let expected_result = Expression {
+            operation: Operation::Value(3),
+            lhs: None,
+            rhs: None,
+        };
 
+        assert_eq!(result, expected_result);
     }
 
     #[test]
     fn from_f32() {
+        let result = Expression::from(3.2_f32);
+        let expected_result = Expression {
+            operation: Operation::Division,
+            lhs: Some(Box::new(Expression::from(16))),
+            rhs: Some(Box::new(Expression::from(5))),
+        };
 
+        assert_eq!(result, expected_result);
     }
 
     #[test]
     fn from_f64() {
+        let result = Expression::from(3.2_f64);
+        let expected_result = Expression {
+            operation: Operation::Division,
+            lhs: Some(Box::new(Expression::from(16))),
+            rhs: Some(Box::new(Expression::from(5))),
+        };
 
-    }
-
-    #[test]
-    fn value() {
-
+        assert_eq!(result, expected_result);
     }
 
     #[test]
@@ -449,9 +827,10 @@ mod expr_tests {
             ),
         };
 
-        let result = 5.0;
+        let result = test_expression.evaluate();
+        let expected_result = 5.0;
 
-        assert_eq!(test_expression.evaluate(), result);
+        assert_eq!(result, expected_result);
     }
 
     #[test]
@@ -556,31 +935,9 @@ mod expr_tests {
     
     #[test]
     fn pow() {
-        let lhs = Expression {
-            operation: Operation::Value(5),
-            lhs: None,
-            rhs: None,
-        };
-
-        let rhs = Expression {
-            operation: Operation::Value(16),
-            lhs: None,
-            rhs: None,
-        };
-
-        let result = lhs ^ rhs;
+        let result = Expression::from(5) ^ Expression::from(16);
         let expected_result = 5_f64.powf(16.0);
 
         assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn pow_i32() {
-
-    }
-
-    #[test]
-    fn pow_f32() {
-
     }
 }
