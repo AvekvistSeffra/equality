@@ -1,8 +1,21 @@
 use crate::precise::expression::Expression;
-use std::ops::{ Mul, Index, IndexMut };
+use std::ops::{ Add, Sub, Mul, Index, IndexMut };
 
+//#[derive(Debug)]
 pub struct Vector4 {
     data: [Expression; 4],
+}
+
+impl std::fmt::Debug for Vector4 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "[{}, {}, {}, {}]", self[0], self[1], self[2], self[3])
+    }
+}
+
+impl Default for Vector4 {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Vector4 {
@@ -49,6 +62,17 @@ impl Vector4 {
         &mut self[3]
     }
 
+    pub fn component(self, rhs: Self) -> Self {
+        Vector4 {
+            data: [
+                self[0].clone() * rhs[0].clone(),
+                self[1].clone() * rhs[1].clone(),
+                self[2].clone() * rhs[2].clone(),
+                self[3].clone() * rhs[3].clone(),
+            ]
+        }
+    }
+
     pub fn norm(&self) -> Expression {
         ((self[0].clone() ^ 2) + (self[1].clone() ^ 2) + (self[2].clone() ^ 2) + (self[3].clone() ^ 2)) ^ (Expression::from(1) / Expression::from(2))
     }
@@ -56,6 +80,30 @@ impl Vector4 {
     pub fn normalize(self) -> Vector4 {
         let norm = self.norm();
         self * norm
+    }
+}
+
+impl Add for Vector4 {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        Vector4::from((self[0].clone() + rhs[0].clone(), self[1].clone() + rhs[1].clone(), self[2].clone() + rhs[2].clone(), self[3].clone() + rhs[3].clone()))
+    }
+}
+
+impl Sub for Vector4 {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        Vector4::from((self[0].clone() - rhs[0].clone(), self[1].clone() - rhs[1].clone(), self[2].clone() - rhs[2].clone(), self[3].clone() - rhs[3].clone()))
+    }
+}
+
+impl Mul for Vector4 {
+    type Output = Expression;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self[0].clone() * rhs[0].clone() + self[1].clone() * rhs[1].clone() + self[2].clone() * rhs[2].clone() + self[3].clone() * rhs[3].clone()
     }
 }
 
@@ -71,6 +119,212 @@ impl Mul<Expression> for Vector4 {
                 self[3].clone() * rhs,
             ]
         }
+    }
+}
+
+impl Mul<i16> for Vector4 {
+    type Output = Self;
+
+    fn mul(self, rhs: i16) -> Self::Output {
+        Vector4 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+                self[3].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<i32> for Vector4 {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Vector4 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+                self[3].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<f32> for Vector4 {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Vector4 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+                self[3].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<f64> for Vector4 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vector4 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+                self[3].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl From<Expression> for Vector4 {
+    fn from(value: Expression) -> Self {
+        Vector4 {
+            data: [
+                value.clone(),
+                value.clone(),
+                value.clone(),
+                value,
+            ]
+        }
+    }
+}
+
+impl From<i16> for Vector4 {
+    fn from(value: i16) -> Self {
+        Vector4 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<i32> for Vector4 {
+    fn from(value: i32) -> Self {
+        Vector4 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<f32> for Vector4 {
+    fn from(value: f32) -> Self {
+        Vector4 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<f64> for Vector4 {
+    fn from(value: f64) -> Self {
+        Vector4 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<(Expression, Expression, Expression, Expression)> for Vector4 {
+    fn from(value: (Expression, Expression, Expression, Expression)) -> Self {
+        let (x, y, z, w) = value;
+
+        Vector4 {
+            data: [
+                x,
+                y,
+                z,
+                w,
+            ]
+        }
+    }
+}
+
+impl From<(i16, i16, i16, i16)> for Vector4 {
+    fn from(value: (i16, i16, i16, i16)) -> Self {
+        let (x, y, z, w) = value;
+
+        Vector4 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+                Expression::from(w),
+            ]
+        }
+    }
+}
+
+impl From<(i32, i32, i32, i32)> for Vector4 {
+    fn from(value: (i32, i32, i32, i32)) -> Self {
+        let (x, y, z, w) = value;
+
+        Vector4 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+                Expression::from(w),
+            ]
+        }
+    }
+}
+
+impl From<(f32, f32, f32, f32)> for Vector4 {
+    fn from(value: (f32, f32, f32, f32)) -> Self {
+        let (x, y, z, w) = value;
+
+        Vector4 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+                Expression::from(w),
+            ]
+        }
+    }
+}
+
+impl From<(f64, f64, f64, f64)> for Vector4 {
+    fn from(value: (f64, f64, f64, f64)) -> Self {
+        let (x, y, z, w) = value;
+
+        Vector4 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+                Expression::from(w),
+            ]
+        }
+    }
+}
+
+impl PartialEq for Vector4 {
+    fn eq(&self, rhs: &Self) -> bool {
+        self[0] == rhs[0] && self[1] == rhs[1] && self[2] == rhs[2] && self[3] == rhs[3]
     }
 }
 
@@ -325,7 +579,7 @@ mod tests {
     #[test]
     fn add() {
         let result = Vector4::from((4, 5, 2, 1)) + Vector4::from(2);
-        let expected_result = Vector4::from((5, 7, 4, 3));
+        let expected_result = Vector4::from((6, 7, 4, 3));
 
         assert_eq!(result, expected_result);
     }
@@ -333,7 +587,7 @@ mod tests {
     #[test]
     fn sub() {
         let result = Vector4::from((4, 5, 2, 1)) - Vector4::from(2);
-        let expected_result = Vector4::from((1, 3, 0, -1));
+        let expected_result = Vector4::from((2, 3, 0, -1));
 
         assert_eq!(result, expected_result);
 
@@ -342,7 +596,7 @@ mod tests {
     #[test]
     fn dot() {
         let result = Vector4::from((4, 5, 2, 1)) * Vector4::from(2);
-        let expected_result = 22;
+        let expected_result = 24;
 
         assert_eq!(result, expected_result);
     }
@@ -397,18 +651,19 @@ mod tests {
 
     #[test]
     fn norm() {
-        let result = Vector3::from((3, 4, 2, 1)).norm();
-        let expected_result = (3.0 * 3.0 + 4.0 * 4.0 + 2.0 * 2.0 + 1.0 * 1.0).sqrt();
+        let result = Vector4::from((3, 4, 2, 1)).norm() ^ 2;
+        let expected_result = 3.0_f32 * 3.0_f32 + 4.0_f32 * 4.0_f32 + 2.0_f32 * 2.0_f32 + 1.0_f32 * 1.0_f32;
 
         assert_eq!(result, expected_result);
     }
 
     #[test]
     fn normalize() {
-        let norm = (3.0 * 3.0 + 4.0 * 4.0 + 2.0 * 2.0 + 1.0 * 1.0).sqrt();
+        let vector = Vector4::from((3, 4, 2, 1));
+        let norm = vector.norm();
 
-        let result = Vector3::from((3, 4, 2, 1)).normalize();
-        let expected_result = Vector3::from((3.0 / norm, 4.0 / norm, 2.0 / norm, 1.0 / norm));
+        let result = vector.normalize();
+        let expected_result = Vector4::from((3.0 / norm.clone(), 4.0 / norm.clone(), 2.0 / norm.clone(), 1.0 / norm));
 
         assert_eq!(result, expected_result);
     }
@@ -421,14 +676,17 @@ mod tests {
         let result1 = &vector[0];
         let result2 = &vector[1];
         let result3 = &vector[2];
+        let result4 = &vector[3];
         
-        let expected_result1 = Expression::from(3);
+        let expected_result1 = Expression::from(4);
         let expected_result2 = Expression::from(5);
         let expected_result3 = Expression::from(2);
+        let expected_result4 = Expression::from(1);
 
         assert_eq!(result1, expected_result1);
         assert_eq!(result2, expected_result2);
         assert_eq!(result3, expected_result3);
+        assert_eq!(result4, expected_result4);
     }
 
     #[test]
@@ -439,13 +697,16 @@ mod tests {
         let mut result1 = &vector[0];
         let mut result2 = &vector[1];
         let mut result3 = &vector[2];
+        let mut result4 = &vector[3];
         
-        let expected_result1 = Expression::from(3);
+        let expected_result1 = Expression::from(4);
         let expected_result2 = Expression::from(5);
         let expected_result3 = Expression::from(2);
+        let expected_result4 = Expression::from(1);
 
         assert_eq!(result1, expected_result1);
         assert_eq!(result2, expected_result2);
         assert_eq!(result3, expected_result3);
+        assert_eq!(result4, expected_result4);
     }
 }

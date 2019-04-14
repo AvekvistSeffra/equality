@@ -1,12 +1,34 @@
 use crate::precise::expression::Expression;
-use std::ops::{ Index, IndexMut };
+use std::ops::{ Add, Sub, Mul, Index, IndexMut };
 
-#[derive(Debug)]
+//#[derive(Debug)]
 pub struct Vector3 {
     data: [Expression; 3],
 }
 
+impl std::fmt::Debug for Vector3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "[{}, {}, {}]", self[0], self[1], self[2])
+    }
+}
+
+impl Default for Vector3 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Vector3 {
+    pub fn new() -> Vector3 {
+        Vector3 {
+            data: [
+                Expression::from(0),
+                Expression::from(0),
+                Expression::from(0),
+            ],
+        }
+    }
+
     pub fn x(&self) -> &Expression {
         &self[0]
     }
@@ -29,6 +51,249 @@ impl Vector3 {
 
     pub fn z_mut(&mut self) -> &mut Expression {
         &mut self[2]
+    }
+
+    pub fn component(self, rhs: Self) -> Self {
+        Vector3 {
+            data: [
+                self[0].clone() * rhs[0].clone(),
+                self[1].clone() * rhs[1].clone(),
+                self[2].clone() * rhs[2].clone(),
+            ]
+        }
+    }
+
+    pub fn norm(&self) -> Expression {
+        ((&self[0] ^ 2) + (&self[1] ^ 2) + (&self[2] ^ 2)) ^ 0.5
+    }
+
+    pub fn normalize(self) -> Vector3 {
+        let norm = self.norm();
+        self * norm
+    }
+}
+
+impl Add for Vector3 {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vector3::from((self[0].clone() + rhs[0].clone(), self[1].clone() + rhs[1].clone(), self[2].clone() + rhs[2].clone()))
+    }
+}
+
+impl Sub for Vector3 {
+    type Output = Self;
+    
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector3::from((self[0].clone() - rhs[0].clone(), self[1].clone() - rhs[1].clone(), self[2].clone() - rhs[2].clone()))
+    }
+}
+
+impl Mul for Vector3 {
+    type Output = Expression;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self[0].clone() * rhs[0].clone() + self[1].clone() * rhs[1].clone() + self[2].clone() * rhs[2].clone()
+    }
+}
+
+impl Mul<Expression> for Vector3 {
+    type Output = Self;
+
+    fn mul(self, rhs: Expression) -> Self::Output {
+        Vector3::from((self[0].clone() * rhs.clone(), self[1].clone() * rhs.clone(), self[2].clone() * rhs.clone()))
+    }
+}
+
+impl Mul<i16> for Vector3 {
+    type Output = Self;
+
+    fn mul(self, rhs: i16) -> Self::Output {
+        Vector3 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<i32> for Vector3 {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Vector3 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<f32> for Vector3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Vector3 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<f64> for Vector3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vector3 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+                self[2].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl From<Expression> for Vector3 {
+    fn from(value: Expression) -> Self {
+        Vector3 {
+            data: [
+                value.clone(),
+                value.clone(),
+                value,
+            ]
+        }
+    }
+}
+
+impl From<i16> for Vector3 {
+    fn from(value: i16) -> Self {
+        Vector3 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<i32> for Vector3 {
+    fn from(value: i32) -> Self {
+        Vector3 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<f32> for Vector3 {
+    fn from(value: f32) -> Self {
+        Vector3 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<f64> for Vector3 {
+    fn from(value: f64) -> Self {
+        Vector3 {
+            data: [
+                Expression::from(value),
+                Expression::from(value),
+                Expression::from(value),
+            ]
+        }
+    }
+}
+
+impl From<(Expression, Expression, Expression)> for Vector3 {
+    fn from(value: (Expression, Expression, Expression)) -> Self {
+        let (x, y, z) = value;
+
+        Vector3 {
+            data: [
+                x,
+                y,
+                z,
+            ]
+        }
+    }
+}
+
+impl From<(i16, i16, i16)> for Vector3 {
+    fn from(value: (i16, i16, i16)) -> Self {
+        let (x, y, z) = value;
+
+        Vector3 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+            ]
+        }
+    }
+}
+
+impl From<(i32, i32, i32)> for Vector3 {
+    fn from(value: (i32, i32, i32)) -> Self {
+        let (x, y, z) = value;
+
+        Vector3 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+            ]
+        }
+    }
+}
+
+impl From<(f32, f32, f32)> for Vector3 {
+    fn from(value: (f32, f32, f32)) -> Self {
+        let (x, y, z) = value;
+
+        Vector3 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+            ]
+        }
+    }
+}
+
+impl From<(f64, f64, f64)> for Vector3 {
+    fn from(value: (f64, f64, f64)) -> Self {
+        let (x, y, z) = value;
+
+        Vector3 {
+            data: [
+                Expression::from(x),
+                Expression::from(y),
+                Expression::from(z),
+            ]
+        }
+    }
+}
+
+impl PartialEq for Vector3 {
+    fn eq(&self, rhs: &Self) -> bool {
+        self[0] == rhs[0] && self[1] == rhs[1] && self[2] == rhs[2]
     }
 }
 
@@ -328,18 +593,19 @@ mod tests {
 
     #[test]
     fn norm() {
-        let result = Vector3::from((3, 4, 2)).norm();
-        let expected_result = (3.0 * 3.0 + 4.0 * 4.0 + 2.0 * 2.0).sqrt();
+        let result = Vector3::from((3, 4, 2)).norm() ^ 2;
+        let expected_result = 3.0_f32 * 3.0_f32 + 4.0_f32 * 4.0_f32 + 2.0_f32 * 2.0_f32;
 
         assert_eq!(result, expected_result);
     }
 
     #[test]
     fn normalize() {
-        let norm = (3.0 * 3.0 + 4.0 * 4.0 + 2.0 * 2.0).sqrt();
+        let vector = Vector3::from((3, 4, 2));
+        let norm = vector.norm();
 
-        let result = Vector3::from((3, 4, 2)).normalize();
-        let expected_result = Vector3::from((3.0 / norm, 4.0 / norm, 2.0 / norm));
+        let result = vector.normalize();
+        let expected_result = Vector3::from((3.0 / norm.clone(), 4.0 / norm.clone(), 2.0 / norm.clone()));
 
         assert_eq!(result, expected_result);
     }

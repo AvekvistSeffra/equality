@@ -1,9 +1,21 @@
 use crate::precise::expression::Expression;
 use std::ops::{ Add, Sub, Mul, Index, IndexMut };
 
-#[derive(Debug)]
+//#[derive(Debug)]
 pub struct Vector2 {
     data: [Expression; 2],
+}
+
+impl std::fmt::Debug for Vector2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "[{}, {}]", self[0], self[1])
+    }
+}
+
+impl Default for Vector2 {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Vector2 {
@@ -40,13 +52,23 @@ impl Vector2 {
             ]
         }
     }
+
+    pub fn norm(&self) -> Expression {
+        ((self[0].clone() ^ 2) + (self[1].clone() ^ 2)) ^ (Expression::from(1) / Expression::from(2))
+    }
+
+    pub fn normalize(self) -> Vector2 {
+        let norm = self.norm();
+        println!("{}", norm.evaluate());
+        self * (Expression::from(1) / Expression::from(norm.evaluate()))
+    }
 }
 
 impl Add for Vector2 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Vector2::from((self.x() + rhs.x(), self.y() + rhs.y()))
+        Vector2::from((self[0].clone() + rhs[0].clone(), self[1].clone() + rhs[1].clone()))
     }
 }
 
@@ -54,7 +76,7 @@ impl Sub for Vector2 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Vector2::from((self.x() - rhs.x(), self.y() - rhs.y()))
+        Vector2::from((self[0].clone() - rhs[0].clone(), self[1].clone() - rhs[1].clone()))
     }
 }
 
@@ -62,7 +84,7 @@ impl Mul for Vector2 {
     type Output = Expression;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        self.x() * rhs.x() + self.y() * rhs.y()
+        self[0].clone() * rhs[0].clone() + self[1].clone() * rhs[1].clone()
     }
 }
 
@@ -70,7 +92,59 @@ impl Mul<Expression> for Vector2 {
     type Output = Self;
 
     fn mul(self, rhs: Expression) -> Self::Output {
-        Vector2::from((self.x() * rhs.clone(), self.y() * rhs))
+        Vector2::from((self[0].clone() * rhs.clone(), self[1].clone() * rhs))
+    }
+}
+
+impl Mul<i16> for Vector2 {
+    type Output = Self;
+
+    fn mul(self, rhs: i16) -> Self::Output {
+        Vector2 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<i32> for Vector2 {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Vector2 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<f32> for Vector2 {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Vector2 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+            ]
+        }
+    }
+}
+
+impl Mul<f64> for Vector2 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vector2 {
+            data: [
+                self[0].clone() * rhs,
+                self[1].clone() * rhs,
+            ]
+        }
     }
 }
 
@@ -132,6 +206,7 @@ impl From<f64> for Vector2 {
 impl From<(Expression, Expression)> for Vector2 {
     fn from(value: (Expression, Expression)) -> Self {
         let (x, y) = value;
+
         Vector2 {
             data: [
                 x,
@@ -195,7 +270,7 @@ impl From<(f64, f64)> for Vector2 {
 
 impl PartialEq for Vector2 {
     fn eq(&self, rhs: &Self) -> bool {
-        self[0] == rhs[0] && self[1] == rhs[1]
+        self[0].eq(&rhs[0]) && self[1].eq(&rhs[1])
     }
 }
 
@@ -363,7 +438,7 @@ mod tests {
 
     #[test]
     fn x() {
-        let result = Vector2::from((4, 3)).x().clone();
+        let result = Vector2::from((4, 3))[0].clone();
         let expected_result = Expression::from(4);
 
         assert_eq!(result, expected_result);
@@ -379,7 +454,7 @@ mod tests {
 
     #[test]
     fn y() {
-        let result = Vector2::from((4, 3)).y().clone();
+        let result = Vector2::from((4, 3))[1].clone();
         let expected_result = Expression::from(3);
 
         assert_eq!(result, expected_result);
@@ -468,8 +543,8 @@ mod tests {
 
     #[test]
     fn norm() {
-        let result = Vector2::from((3, 4)).norm();
-        let expected_result = 5;
+        let result = Vector2::from((6, 8)).norm();
+        let expected_result = 10;
 
         assert_eq!(result, expected_result);
     }

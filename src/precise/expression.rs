@@ -16,7 +16,7 @@ pub enum Operation {
 
 impl From<i16> for Operation {
     fn from(value: i16) -> Self {
-        Operation::Value(value as i32)
+        Operation::Value(i32::from(value))
     }
 }
 
@@ -72,17 +72,23 @@ impl PartialEq for Operation {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Expression {
     operation: Operation,
     lhs: Option<Box<Expression>>,
     rhs: Option<Box<Expression>>,
 }
 
+impl std::fmt::Debug for Expression {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
 impl Expression {
     pub fn evaluate(&self) -> f64 {
         match self.operation {
-            Operation::Value(x) => x as f64,
+            Operation::Value(x) => f64::from(x),
             Operation::Addition => {
                 if let Some(lhs) = &self.lhs {
                     if let Some(rhs) = &self.rhs {
@@ -169,11 +175,7 @@ impl Add for &Expression {
     type Output = Expression;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Addition,
-            lhs: Some(Box::new(self.clone())),
-            rhs: Some(Box::new(rhs.clone())),
-        }
+        self.clone() + rhs.clone()
     }
 }
 
@@ -181,11 +183,7 @@ impl Add<Expression> for &Expression {
     type Output = Expression;
 
     fn add(self, rhs: Expression) -> Self::Output {
-        Expression {
-            operation: Operation::Addition,
-            lhs: Some(Box::new(self.clone())),
-            rhs: Some(Box::new(rhs)),
-        }
+        self.clone() + rhs
     }
 }
 
@@ -193,11 +191,71 @@ impl Add<&Expression> for Expression {
     type Output = Self;
 
     fn add(self, rhs: &Expression) -> Self::Output {
-        Expression {
-            operation: Operation::Addition,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs.clone())),
-        }
+        self + rhs.clone()
+    }
+}
+
+impl Add<i16> for Expression {
+    type Output = Self;
+
+    fn add(self, rhs: i16) -> Self::Output {
+        self + Expression::from(rhs)
+    }
+}
+
+impl Add<i32> for Expression {
+    type Output = Self;
+
+    fn add(self, rhs: i32) -> Self::Output {
+        self + Expression::from(rhs)
+    }
+}
+
+impl Add<f32> for Expression {
+    type Output = Self;
+
+    fn add(self, rhs: f32) -> Self::Output {
+        self + Expression::from(rhs)
+    }
+}
+
+impl Add<f64> for Expression {
+    type Output = Self;
+
+    fn add(self, rhs: f64) -> Self::Output {
+        self + Expression::from(rhs)
+    }
+}
+
+impl Add<Expression> for i16 {
+    type Output = Expression;
+
+    fn add(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) + rhs
+    }
+}
+
+impl Add<Expression> for i32 {
+    type Output = Expression;
+
+    fn add(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) + rhs
+    }
+}
+
+impl Add<Expression> for f32 {
+    type Output = Expression;
+
+    fn add(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) + rhs
+    }
+}
+
+impl Add<Expression> for f64 {
+    type Output = Expression;
+
+    fn add(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) + rhs
     }
 }
 
@@ -217,11 +275,7 @@ impl Sub for &Expression {
     type Output = Expression;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Subtraction,
-            lhs: Some(Box::new(self.clone())),
-            rhs: Some(Box::new(rhs.clone())),
-        }
+        self.clone() - rhs.clone()
     }
 }
 
@@ -229,11 +283,7 @@ impl Sub<Expression> for &Expression {
     type Output = Expression;
 
     fn sub(self, rhs: Expression) -> Self::Output {
-        Expression {
-            operation: Operation::Subtraction,
-            lhs: Some(Box::new(self.clone())),
-            rhs: Some(Box::new(rhs)),
-        }
+        self.clone() - rhs
     }
 }
 
@@ -241,11 +291,71 @@ impl Sub<&Expression> for Expression {
     type Output = Self;
 
     fn sub(self, rhs: &Expression) -> Self::Output {
-        Expression {
-            operation: Operation::Subtraction,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs.clone())),
-        }
+        self - rhs.clone()
+    }
+}
+
+impl Sub<i16> for Expression {
+    type Output = Self;
+
+    fn sub(self, rhs: i16) -> Self::Output {
+        self - Expression::from(rhs)
+    }
+}
+
+impl Sub<i32> for Expression {
+    type Output = Self;
+
+    fn sub(self, rhs: i32) -> Self::Output {
+        self - Expression::from(rhs)
+    }
+}
+
+impl Sub<f32> for Expression {
+    type Output = Self;
+
+    fn sub(self, rhs: f32) -> Self::Output {
+        self - Expression::from(rhs)
+    }
+}
+
+impl Sub<f64> for Expression {
+    type Output = Self;
+
+    fn sub(self, rhs: f64) -> Self::Output {
+        self - Expression::from(rhs)
+    }
+}
+
+impl Sub<Expression> for i16 {
+    type Output = Expression;
+
+    fn sub(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) - rhs
+    }
+}
+
+impl Sub<Expression> for i32 {
+    type Output = Expression;
+
+    fn sub(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) - rhs
+    }
+}
+
+impl Sub<Expression> for f32 {
+    type Output = Expression;
+
+    fn sub(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) - rhs
+    }
+}
+
+impl Sub<Expression> for f64 {
+    type Output = Expression;
+
+    fn sub(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) - rhs
     }
 }
 
@@ -265,11 +375,7 @@ impl Mul for &Expression {
     type Output = Expression;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Multiplication,
-            lhs: Some(Box::new(self.clone())),
-            rhs: Some(Box::new(rhs.clone())),
-        }
+        self.clone() * rhs.clone()
     }
 }
 
@@ -277,11 +383,7 @@ impl Mul<Expression> for &Expression {
     type Output = Expression;
 
     fn mul(self, rhs: Expression) -> Self::Output {
-        Expression {
-            operation: Operation::Multiplication,
-            lhs: Some(Box::new(self.clone())),
-            rhs: Some(Box::new(rhs)),
-        }
+        self.clone() * rhs
     }
 }
 
@@ -289,23 +391,184 @@ impl Mul<&Expression> for Expression {
     type Output = Self;
 
     fn mul(self, rhs: &Self) -> Self::Output {
-        Expression {
-            operation: Operation::Multiplication,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs.clone())),
-        }
+        self * rhs.clone()
     }
 }
 
+impl Mul<i16> for Expression {
+    type Output = Self;
+
+    fn mul(self, rhs: i16) -> Self::Output {
+        self * Expression::from(rhs)
+    }
+}
+
+impl Mul<i32> for Expression {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        self * Expression::from(rhs)
+    }
+}
+
+impl Mul<f32> for Expression {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        self * Expression::from(rhs)
+    }
+}
+
+impl Mul<f64> for Expression {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        self * Expression::from(rhs)
+    }
+}
+
+impl Mul<Expression> for i16 {
+    type Output = Expression;
+
+    fn mul(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) * rhs
+    }
+}
+
+impl Mul<Expression> for i32 {
+    type Output = Expression;
+
+    fn mul(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) * rhs
+    }
+}
+
+impl Mul<Expression> for f32 {
+    type Output = Expression;
+
+    fn mul(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) * rhs
+    }
+}
+
+impl Mul<Expression> for f64 {
+    type Output = Expression;
+
+    fn mul(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) * rhs
+    }
+}
+
+// IT IS OVERFLOWING THE STACK HERE
 impl Div for Expression {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Division,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs)),
+        if let Operation::Value(x) = self.operation {
+            if x == 1 {
+                1 / rhs
+            } else {
+                self / rhs
+            }
+        } else {
+            if let Operation::Value(y) = rhs.operation {
+                if y == 1 {
+                    self
+                } else {
+                    self / rhs
+                }
+            } else {
+                self / rhs
+            }
         }
+    }
+}
+
+impl Div for &Expression {
+    type Output = Expression;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        self.clone() / rhs.clone()
+    }
+}
+
+impl Div<Expression> for &Expression {
+    type Output = Expression;
+
+    fn div(self, rhs: Expression) -> Self::Output {
+        self.clone() / rhs
+    }
+}
+
+impl Div<&Expression> for Expression {
+    type Output = Self;
+
+    fn div(self, rhs: &Self) -> Self::Output {
+        self / rhs.clone()
+    }
+}
+
+impl Div<i16> for Expression {
+    type Output = Self;
+
+    fn div(self, rhs: i16) -> Self::Output {
+        self / Expression::from(rhs)
+    }
+}
+
+impl Div<i32> for Expression {
+    type Output = Self;
+
+    fn div(self, rhs: i32) -> Self::Output {
+        self / Expression::from(rhs)
+    }
+}
+
+impl Div<f32> for Expression {
+    type Output = Self;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        self / Expression::from(rhs)
+    }
+}
+
+impl Div<f64> for Expression {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        self / Expression::from(rhs)
+    }
+}
+
+impl Div<Expression> for i16 {
+    type Output = Expression;
+
+    fn div(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) / rhs
+    }
+}
+
+impl Div<Expression> for i32 {
+    type Output = Expression;
+
+    fn div(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) / rhs
+    }
+}
+
+impl Div<Expression> for f32 {
+    type Output = Expression;
+
+    fn div(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) / rhs
+    }
+}
+
+impl Div<Expression> for f64 {
+    type Output = Expression;
+
+    fn div(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) / rhs
     }
 }
 
@@ -321,6 +584,94 @@ impl Rem for Expression {
     }
 }
 
+impl Rem for &Expression {
+    type Output = Expression;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        self.clone() % rhs.clone()
+    }
+}
+
+impl Rem<Expression> for &Expression {
+    type Output = Expression;
+
+    fn rem(self, rhs: Expression) -> Self::Output {
+        self.clone() % rhs
+    }
+}
+
+impl Rem<&Expression> for Expression {
+    type Output = Self;
+
+    fn rem(self, rhs: &Self) -> Self::Output {
+        self % rhs.clone()
+    }
+}
+
+impl Rem<i16> for Expression {
+    type Output = Self;
+
+    fn rem(self, rhs: i16) -> Self::Output {
+        self % Expression::from(rhs)
+    }
+}
+
+impl Rem<i32> for Expression {
+    type Output = Self;
+
+    fn rem(self, rhs: i32) -> Self::Output {
+        self % Expression::from(rhs)
+    }
+}
+
+impl Rem<f32> for Expression {
+    type Output = Self;
+
+    fn rem(self, rhs: f32) -> Self::Output {
+        self % Expression::from(rhs)
+    }
+}
+
+impl Rem<f64> for Expression {
+    type Output = Self;
+
+    fn rem(self, rhs: f64) -> Self::Output {
+        self % Expression::from(rhs)
+    }
+}
+
+impl Rem<Expression> for i16 {
+    type Output = Expression;
+
+    fn rem(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) % rhs
+    }
+}
+
+impl Rem<Expression> for i32 {
+    type Output = Expression;
+
+    fn rem(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) % rhs
+    }
+}
+
+impl Rem<Expression> for f32 {
+    type Output = Expression;
+
+    fn rem(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) % rhs
+    }
+}
+
+impl Rem<Expression> for f64 {
+    type Output = Expression;
+
+    fn rem(self, rhs: Expression) -> Self::Output {
+        Expression::from(self) % rhs
+    }
+}
+
 impl BitXor for Expression {
     type Output = Self;
 
@@ -333,15 +684,43 @@ impl BitXor for Expression {
     }
 }
 
+impl BitXor for &Expression {
+    type Output = Expression;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        self.clone() ^ rhs.clone()
+    }
+}
+
+impl BitXor<Expression> for &Expression {
+    type Output = Expression;
+
+    fn bitxor(self, rhs: Expression) -> Self::Output {
+        self.clone() ^ rhs
+    }
+}
+
+impl BitXor<&Expression> for Expression {
+    type Output = Self;
+
+    fn bitxor(self, rhs: &Expression) -> Self::Output {
+        self ^ rhs.clone()
+    }
+}
+
+impl BitXor<i16> for Expression {
+    type Output = Self;
+
+    fn bitxor(self, rhs: i16) -> Self::Output {
+        self ^ Expression::from(rhs)
+    }
+}
+
 impl BitXor<i32> for Expression {
     type Output = Self;
 
     fn bitxor(self, rhs: i32) -> Self::Output {
-        Expression {
-            operation: Operation::Exponent,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(Expression::from(rhs))),
-        }
+        self ^ Expression::from(rhs)
     }
 }
 
@@ -349,25 +728,53 @@ impl BitXor<f32> for Expression {
     type Output = Self;
 
     fn bitxor(self, rhs: f32) -> Self::Output {
-        let denominator = 10_000_000;
-        let rhs = (rhs * (denominator as f32)) as i32;
-        let gcd = crate::utils::greatest_common_divisor(rhs, denominator);
+        self ^ Expression::from(rhs)
+    }
+}
 
-        Expression {
-            operation: Operation::Exponent,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(Expression {
-                operation: Operation::Division,
-                lhs: Some(Box::new(Expression::from(rhs / gcd))),
-                rhs: Some(Box::new(Expression::from(denominator / gcd))),
-            })),
-        }
+impl BitXor<f64> for Expression {
+    type Output = Self;
+
+    fn bitxor(self, rhs: f64) -> Self::Output {
+        self ^ Expression::from(rhs)
+    }
+}
+
+impl BitXor<i16> for &Expression {
+    type Output = Expression;
+
+    fn bitxor(self, rhs: i16) -> Self::Output {
+        self.clone() ^ rhs
+    }
+}
+
+impl BitXor<i32> for &Expression {
+    type Output = Expression;
+
+    fn bitxor(self, rhs: i32) -> Self::Output {
+        self.clone() ^ rhs
+    }
+}
+
+impl BitXor<f32> for &Expression {
+    type Output = Expression;
+
+    fn bitxor(self, rhs: f32) -> Self::Output {
+        self.clone() ^ rhs
+    }
+}
+
+impl BitXor<f64> for &Expression {
+    type Output = Expression;
+
+    fn bitxor(self, rhs: f64) -> Self::Output {
+        self.clone() ^ rhs
     }
 }
 
 impl From<i16> for Expression {
     fn from(value: i16) -> Self {
-        Expression::from(value as i32)
+        Expression::from(i32::from(value))
     }
 }
 
@@ -398,7 +805,7 @@ impl From<f32> for Expression {
 impl From<f64> for Expression {
     fn from(value: f64) -> Self {
         let denominator = 10_000_000;
-        let value = (value * (denominator as f64)) as i32;
+        let value = (value * f64::from(denominator)) as i32;
         let gcd = crate::utils::greatest_common_divisor(value, denominator);
 
         Expression {
@@ -459,19 +866,19 @@ impl PartialEq<&Expression> for Expression {
 
 impl PartialEq<i16> for Expression {
     fn eq(&self, rhs: &i16) -> bool {
-        self.evaluate() == (*rhs as f64)
+        self.evaluate() == f64::from(*rhs)
     }
 }
 
 impl PartialEq<i32> for Expression {
     fn eq(&self, rhs: &i32) -> bool {
-        self.evaluate() == (*rhs as f64)
+        self.evaluate() == f64::from(*rhs)
     }
 }
 
 impl PartialEq<f32> for Expression {
     fn eq(&self, rhs: &f32) -> bool {
-        self.evaluate() == (*rhs as f64)
+        self.evaluate() == f64::from(*rhs)
     }
 }
 
@@ -809,26 +1216,10 @@ mod expr_tests {
 
     #[test]
     fn evaluate() {
-        let test_expression = Expression {
-            operation: Operation::Addition,
-            lhs: Some(Box::new(Expression {
-                        operation: Operation::Value(2),
-                        lhs: None,
-                        rhs: None,
-                    }
-                )
-            ),
-            rhs: Some(Box::new(Expression {
-                        operation: Operation::Value(3),
-                        lhs: None,
-                        rhs: None,
-                    }
-                )
-            ),
-        };
+        let test_expression: Expression = Expression::from(3) + 2 - Expression::from(0.5) / 5 * 2; 
 
         let result = test_expression.evaluate();
-        let expected_result = 5.0;
+        let expected_result = 5.0 - 1.0 / 5.0;
 
         assert_eq!(result, expected_result);
     }
