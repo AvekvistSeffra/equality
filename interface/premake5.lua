@@ -5,7 +5,7 @@ project "equality"
     staticruntime "on"
 
     targetdir ("binaries/" .. outputdir .. "/%{prj.name}")
-    objdir ("intermediates" .. outputdir .. "/%{prj.name}")
+    objdir ("intermediates/" .. outputdir .. "/%{prj.name}")
 
     files {
         "/source/**.h",

@@ -1,4 +1,14 @@
+# Directories
+.vs/
+.vscode/
+.VSCodeCounter/
+binaries/
+intermediates/
 /target
+
+# Files
+*.user
+*.sln
+*.vcxproj
 **/*.rs.bk
 Cargo.lock
-.VSCodeCounter/
