@@ -1,5 +1,7 @@
 use std::ops::{ Index, IndexMut };
+use serde_derive::{ Serialize, Deserialize };
 
+#[derive(Serialize, Deserialize)]
 pub struct Vector4 {
     data: [f64; 4],
 }

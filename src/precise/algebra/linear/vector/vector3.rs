@@ -1,7 +1,8 @@
 use crate::precise::expression::Expression;
 use std::ops::{ Add, Sub, Mul, Index, IndexMut };
+use serde_derive::{ Serialize, Deserialize };
 
-//#[derive(Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Vector3 {
     data: [Expression; 3],
 }

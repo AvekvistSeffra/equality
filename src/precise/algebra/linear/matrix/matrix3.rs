@@ -1,6 +1,8 @@
 use crate::precise::expression::Expression;
 use std::ops::{ Index, IndexMut };
+use serde_derive::{ Serialize, Deserialize };
 
+#[derive(Serialize, Deserialize)]
 pub struct Matrix3 {
     data: [Expression; 9],
 }

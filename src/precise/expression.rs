@@ -2,8 +2,9 @@ use std::fmt;
 use fmt::{ Display, Formatter };
 use std::ops::{ Add, Sub, Mul, Div, Rem, BitXor };
 use std::cmp::Ordering;
+use serde_derive::{ Serialize, Deserialize };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum Operation {
     Value(i32),
     Addition,
@@ -72,7 +73,7 @@ impl PartialEq for Operation {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Expression {
     operation: Operation,
     lhs: Option<Box<Expression>>,

@@ -13,3 +13,5 @@ description = "equality is a precise, performant and expressive math library for
 license = "MIT"
 
 [dependencies]
+serde = "1.0.90"
+serde_derive = "1.0.90"
