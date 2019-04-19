@@ -1,14 +1,14 @@
-use crate::precise::expression::Expression;
+use crate::precise::expression::Expr;
 use std::ops::{ Index, IndexMut };
 use serde_derive::{ Serialize, Deserialize };
 
 #[derive(Serialize, Deserialize)]
 pub struct Matrix4 {
-    data: [Expression; 16],
+    data: [Expr; 16],
 }
 
 impl Index<usize> for Matrix4 {
-    type Output = Expression;
+    type Output = Expr;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]

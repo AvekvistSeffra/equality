@@ -1,6 +1,6 @@
-use crate::precise::expression::Expression;
+use crate::precise::expression::Expr;
 
 pub struct Complex {
-    pub real: Expression,
-    pub imaginary: Expression,
+    pub real: Expr,
+    pub imaginary: Expr,
 }

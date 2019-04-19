@@ -1,8 +1,8 @@
-use crate::precise::expression::Expression;
+use crate::precise::expression::Expr;
 
 pub struct Quaternion {
-    pub w: Expression,
-    pub x: Expression,
-    pub y: Expression,
-    pub z: Expression,
+    pub w: Expr,
+    pub x: Expr,
+    pub y: Expr,
+    pub z: Expr,
 }

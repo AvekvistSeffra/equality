@@ -1,826 +1,914 @@
 use std::fmt;
-use fmt::{ Display, Formatter };
-use std::ops::{ Add, Sub, Mul, Div, Rem, BitXor };
 use std::cmp::Ordering;
+use std::ops::{ Add, Sub, Mul, Div, Rem, BitXor };
 use serde_derive::{ Serialize, Deserialize };
+use std::marker::Sized;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-pub enum Operation {
-    Value(i32),
-    Addition,
-    Subtraction,
-    Multiplication,
-    Division,
-    Modulus,
-    Exponent,
+pub trait Number: Add + Sub + Mul + Div + Sized {}
+impl Number for i8 {}
+impl Number for i16 {}
+impl Number for i32 {}
+impl Number for i64 {}
+impl Number for i128 {}
+impl Number for u8 {}
+impl Number for u16 {}
+impl Number for u32 {}
+impl Number for u64 {}
+impl Number for u128 {}
+impl Number for f32 {}
+impl Number for f64 {}
+impl Number for Expr {}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Expr {
+    Val(i32),
+    Add(Box<Expr>, Box<Expr>),
+    Sub(Box<Expr>, Box<Expr>),
+    Mul(Box<Expr>, Box<Expr>),
+    Div(Box<Expr>, Box<Expr>),
+    Rem(Box<Expr>, Box<Expr>),
+    Exp(Box<Expr>, Box<Expr>),
 }
 
-impl From<i16> for Operation {
+impl Expr {
+    pub fn eval(&self) -> f64 {
+        match self {
+            Expr::Val(x) => f64::from(*x),
+            Expr::Add(x, y) => x.eval() + y.eval(),
+            Expr::Sub(x, y) => x.eval() - y.eval(),
+            Expr::Mul(x, y) => x.eval() * y.eval(),
+            Expr::Div(x, y) => x.eval() / y.eval(),
+            Expr::Rem(x, y) => x.eval() % y.eval(),
+            Expr::Exp(x, y) => x.eval().powf(y.eval()),
+        }
+    }
+}
+
+impl From <i8> for Expr {
+    fn from(value: i8) -> Self {
+        Expr::Val(i32::from(value))
+    }
+}
+
+impl From<i16> for Expr {
     fn from(value: i16) -> Self {
-        Operation::Value(i32::from(value))
+        Expr::Val(i32::from(value))
     }
 }
 
-impl From<i32> for Operation {
+impl From<i32> for Expr {
     fn from(value: i32) -> Self {
-        Operation::Value(value)
+        Expr::Val(i32::from(value))
     }
 }
 
-impl PartialEq for Operation {
-    fn eq(&self, rhs: &Self) -> bool {
-        if let Operation::Value(x) = self {
-            if let Operation::Value(y) = rhs {
-                x == y
-            } else {
-                false
-            }
-        } else {
-            match self {
-                Operation::Addition => {
-                    match rhs {
-                        Operation::Addition => true,
-                        _ => false,
-                    }
-                },
-                Operation::Subtraction => {
-                    match rhs {
-                        Operation::Subtraction => true,
-                        _ => false,
-                    }
-                },
-                Operation::Multiplication => {
-                    match rhs {
-                        Operation::Multiplication => true,
-                        _ => false,
-                    }
-                },
-                Operation::Division => {
-                    match rhs {
-                        Operation::Division => true,
-                        _ => false,
-                    }
-                },
-                Operation::Modulus => {
-                    match rhs {
-                        Operation::Modulus => true,
-                        _ => false,
-                    }
-                },
-                _ => false,
-            }
-        }
+impl From<i64> for Expr {
+    fn from(value: i64) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Expression {
-    operation: Operation,
-    lhs: Option<Box<Expression>>,
-    rhs: Option<Box<Expression>>,
-}
-
-impl std::fmt::Debug for Expression {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self)
-    }
-}
-
-impl Expression {
-    pub fn evaluate(&self) -> f64 {
-        match self.operation {
-            Operation::Value(x) => f64::from(x),
-            Operation::Addition => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        lhs.evaluate() + rhs.evaluate()
-                    } else {
-                        0.0
-                    }
-                } else {
-                    0.0
-                }
-            },
-            Operation::Subtraction => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        lhs.evaluate() - rhs.evaluate()
-                    } else {
-                        0.0
-                    }
-                } else {
-                    0.0
-                }
-            },
-            Operation::Multiplication => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        lhs.evaluate() * rhs.evaluate()
-                    } else {
-                        0.0
-                    }
-                } else {
-                    0.0
-                }
-            },
-            Operation::Division => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        lhs.evaluate() / rhs.evaluate()
-                    } else {
-                        0.0
-                    }
-                } else {
-                    0.0
-                }
-            },
-            Operation::Modulus => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        lhs.evaluate() % rhs.evaluate()
-                    } else {
-                        0.0
-                    }
-                } else {
-                    0.0
-                }
-            },
-            Operation::Exponent => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        lhs.evaluate().powf(rhs.evaluate())
-                    } else {
-                        0.0
-                    }
-                } else {
-                    0.0
-                }
-            },
-        }
-    }
-}
-
-impl Add for Expression {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Addition,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs)),
-        }
-    }
-}
-
-impl Add for &Expression {
-    type Output = Expression;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        self.clone() + rhs.clone()
-    }
-}
-
-impl Add<Expression> for &Expression {
-    type Output = Expression;
-
-    fn add(self, rhs: Expression) -> Self::Output {
-        self.clone() + rhs
-    }
-}
-
-impl Add<&Expression> for Expression {
-    type Output = Self;
-
-    fn add(self, rhs: &Expression) -> Self::Output {
-        self + rhs.clone()
-    }
-}
-
-impl Add<i16> for Expression {
-    type Output = Self;
-
-    fn add(self, rhs: i16) -> Self::Output {
-        self + Expression::from(rhs)
-    }
-}
-
-impl Add<i32> for Expression {
-    type Output = Self;
-
-    fn add(self, rhs: i32) -> Self::Output {
-        self + Expression::from(rhs)
-    }
-}
-
-impl Add<f32> for Expression {
-    type Output = Self;
-
-    fn add(self, rhs: f32) -> Self::Output {
-        self + Expression::from(rhs)
-    }
-}
-
-impl Add<f64> for Expression {
-    type Output = Self;
-
-    fn add(self, rhs: f64) -> Self::Output {
-        self + Expression::from(rhs)
-    }
-}
-
-impl Add<Expression> for i16 {
-    type Output = Expression;
-
-    fn add(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) + rhs
-    }
-}
-
-impl Add<Expression> for i32 {
-    type Output = Expression;
-
-    fn add(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) + rhs
-    }
-}
-
-impl Add<Expression> for f32 {
-    type Output = Expression;
-
-    fn add(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) + rhs
-    }
-}
-
-impl Add<Expression> for f64 {
-    type Output = Expression;
-
-    fn add(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) + rhs
-    }
-}
-
-impl Sub for Expression {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Subtraction,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs)),
-        }
-    }
-}
-
-impl Sub for &Expression {
-    type Output = Expression;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        self.clone() - rhs.clone()
-    }
-}
-
-impl Sub<Expression> for &Expression {
-    type Output = Expression;
-
-    fn sub(self, rhs: Expression) -> Self::Output {
-        self.clone() - rhs
-    }
-}
-
-impl Sub<&Expression> for Expression {
-    type Output = Self;
-
-    fn sub(self, rhs: &Expression) -> Self::Output {
-        self - rhs.clone()
-    }
-}
-
-impl Sub<i16> for Expression {
-    type Output = Self;
-
-    fn sub(self, rhs: i16) -> Self::Output {
-        self - Expression::from(rhs)
-    }
-}
-
-impl Sub<i32> for Expression {
-    type Output = Self;
-
-    fn sub(self, rhs: i32) -> Self::Output {
-        self - Expression::from(rhs)
-    }
-}
-
-impl Sub<f32> for Expression {
-    type Output = Self;
-
-    fn sub(self, rhs: f32) -> Self::Output {
-        self - Expression::from(rhs)
-    }
-}
-
-impl Sub<f64> for Expression {
-    type Output = Self;
-
-    fn sub(self, rhs: f64) -> Self::Output {
-        self - Expression::from(rhs)
-    }
-}
-
-impl Sub<Expression> for i16 {
-    type Output = Expression;
-
-    fn sub(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) - rhs
-    }
-}
-
-impl Sub<Expression> for i32 {
-    type Output = Expression;
-
-    fn sub(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) - rhs
-    }
-}
-
-impl Sub<Expression> for f32 {
-    type Output = Expression;
-
-    fn sub(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) - rhs
-    }
-}
-
-impl Sub<Expression> for f64 {
-    type Output = Expression;
-
-    fn sub(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) - rhs
-    }
-}
-
-impl Mul for Expression {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Multiplication,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs)),
-        }
-    }
-}
-
-impl Mul for &Expression {
-    type Output = Expression;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        self.clone() * rhs.clone()
-    }
-}
-
-impl Mul<Expression> for &Expression {
-    type Output = Expression;
-
-    fn mul(self, rhs: Expression) -> Self::Output {
-        self.clone() * rhs
-    }
-}
-
-impl Mul<&Expression> for Expression {
-    type Output = Self;
-
-    fn mul(self, rhs: &Self) -> Self::Output {
-        self * rhs.clone()
-    }
-}
-
-impl Mul<i16> for Expression {
-    type Output = Self;
-
-    fn mul(self, rhs: i16) -> Self::Output {
-        self * Expression::from(rhs)
-    }
-}
-
-impl Mul<i32> for Expression {
-    type Output = Self;
-
-    fn mul(self, rhs: i32) -> Self::Output {
-        self * Expression::from(rhs)
-    }
-}
-
-impl Mul<f32> for Expression {
-    type Output = Self;
-
-    fn mul(self, rhs: f32) -> Self::Output {
-        self * Expression::from(rhs)
-    }
-}
-
-impl Mul<f64> for Expression {
-    type Output = Self;
-
-    fn mul(self, rhs: f64) -> Self::Output {
-        self * Expression::from(rhs)
-    }
-}
-
-impl Mul<Expression> for i16 {
-    type Output = Expression;
-
-    fn mul(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) * rhs
-    }
-}
-
-impl Mul<Expression> for i32 {
-    type Output = Expression;
-
-    fn mul(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) * rhs
-    }
-}
-
-impl Mul<Expression> for f32 {
-    type Output = Expression;
-
-    fn mul(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) * rhs
-    }
-}
-
-impl Mul<Expression> for f64 {
-    type Output = Expression;
-
-    fn mul(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) * rhs
-    }
-}
-
-// IT IS OVERFLOWING THE STACK HERE
-impl Div for Expression {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        if let Operation::Value(x) = self.operation {
-            if x == 1 {
-                1 / rhs
-            } else {
-                self / rhs
-            }
-        } else {
-            if let Operation::Value(y) = rhs.operation {
-                if y == 1 {
-                    self
-                } else {
-                    self / rhs
-                }
-            } else {
-                self / rhs
-            }
-        }
-    }
-}
-
-impl Div for &Expression {
-    type Output = Expression;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        self.clone() / rhs.clone()
-    }
-}
-
-impl Div<Expression> for &Expression {
-    type Output = Expression;
-
-    fn div(self, rhs: Expression) -> Self::Output {
-        self.clone() / rhs
-    }
-}
-
-impl Div<&Expression> for Expression {
-    type Output = Self;
-
-    fn div(self, rhs: &Self) -> Self::Output {
-        self / rhs.clone()
-    }
-}
-
-impl Div<i16> for Expression {
-    type Output = Self;
-
-    fn div(self, rhs: i16) -> Self::Output {
-        self / Expression::from(rhs)
-    }
-}
-
-impl Div<i32> for Expression {
-    type Output = Self;
-
-    fn div(self, rhs: i32) -> Self::Output {
-        self / Expression::from(rhs)
-    }
-}
-
-impl Div<f32> for Expression {
-    type Output = Self;
-
-    fn div(self, rhs: f32) -> Self::Output {
-        self / Expression::from(rhs)
-    }
-}
-
-impl Div<f64> for Expression {
-    type Output = Self;
-
-    fn div(self, rhs: f64) -> Self::Output {
-        self / Expression::from(rhs)
-    }
-}
-
-impl Div<Expression> for i16 {
-    type Output = Expression;
-
-    fn div(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) / rhs
-    }
-}
-
-impl Div<Expression> for i32 {
-    type Output = Expression;
-
-    fn div(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) / rhs
-    }
-}
-
-impl Div<Expression> for f32 {
-    type Output = Expression;
-
-    fn div(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) / rhs
-    }
-}
-
-impl Div<Expression> for f64 {
-    type Output = Expression;
-
-    fn div(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) / rhs
-    }
-}
-
-impl Rem for Expression {
-    type Output = Self;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Modulus,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs)),
-        }
-    }
-}
-
-impl Rem for &Expression {
-    type Output = Expression;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        self.clone() % rhs.clone()
-    }
-}
-
-impl Rem<Expression> for &Expression {
-    type Output = Expression;
-
-    fn rem(self, rhs: Expression) -> Self::Output {
-        self.clone() % rhs
-    }
-}
-
-impl Rem<&Expression> for Expression {
-    type Output = Self;
-
-    fn rem(self, rhs: &Self) -> Self::Output {
-        self % rhs.clone()
-    }
-}
-
-impl Rem<i16> for Expression {
-    type Output = Self;
-
-    fn rem(self, rhs: i16) -> Self::Output {
-        self % Expression::from(rhs)
-    }
-}
-
-impl Rem<i32> for Expression {
-    type Output = Self;
-
-    fn rem(self, rhs: i32) -> Self::Output {
-        self % Expression::from(rhs)
-    }
-}
-
-impl Rem<f32> for Expression {
-    type Output = Self;
-
-    fn rem(self, rhs: f32) -> Self::Output {
-        self % Expression::from(rhs)
-    }
-}
-
-impl Rem<f64> for Expression {
-    type Output = Self;
-
-    fn rem(self, rhs: f64) -> Self::Output {
-        self % Expression::from(rhs)
-    }
-}
-
-impl Rem<Expression> for i16 {
-    type Output = Expression;
-
-    fn rem(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) % rhs
-    }
-}
-
-impl Rem<Expression> for i32 {
-    type Output = Expression;
-
-    fn rem(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) % rhs
-    }
-}
-
-impl Rem<Expression> for f32 {
-    type Output = Expression;
-
-    fn rem(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) % rhs
-    }
-}
-
-impl Rem<Expression> for f64 {
-    type Output = Expression;
-
-    fn rem(self, rhs: Expression) -> Self::Output {
-        Expression::from(self) % rhs
-    }
-}
-
-impl BitXor for Expression {
-    type Output = Self;
-
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        Expression {
-            operation: Operation::Exponent,
-            lhs: Some(Box::new(self)),
-            rhs: Some(Box::new(rhs)),
-        }
-    }
-}
-
-impl BitXor for &Expression {
-    type Output = Expression;
-
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        self.clone() ^ rhs.clone()
-    }
-}
-
-impl BitXor<Expression> for &Expression {
-    type Output = Expression;
-
-    fn bitxor(self, rhs: Expression) -> Self::Output {
-        self.clone() ^ rhs
-    }
-}
-
-impl BitXor<&Expression> for Expression {
-    type Output = Self;
-
-    fn bitxor(self, rhs: &Expression) -> Self::Output {
-        self ^ rhs.clone()
-    }
-}
-
-impl BitXor<i16> for Expression {
-    type Output = Self;
-
-    fn bitxor(self, rhs: i16) -> Self::Output {
-        self ^ Expression::from(rhs)
-    }
-}
-
-impl BitXor<i32> for Expression {
-    type Output = Self;
-
-    fn bitxor(self, rhs: i32) -> Self::Output {
-        self ^ Expression::from(rhs)
+impl From<i128> for Expr {
+    fn from(value: i128) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
 
-impl BitXor<f32> for Expression {
-    type Output = Self;
-
-    fn bitxor(self, rhs: f32) -> Self::Output {
-        self ^ Expression::from(rhs)
-    }
-}
-
-impl BitXor<f64> for Expression {
-    type Output = Self;
-
-    fn bitxor(self, rhs: f64) -> Self::Output {
-        self ^ Expression::from(rhs)
+impl From <u8> for Expr {
+    fn from(value: u8) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
-
-impl BitXor<i16> for &Expression {
-    type Output = Expression;
 
-    fn bitxor(self, rhs: i16) -> Self::Output {
-        self.clone() ^ rhs
+impl From<u16> for Expr {
+    fn from(value: u16) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
 
-impl BitXor<i32> for &Expression {
-    type Output = Expression;
-
-    fn bitxor(self, rhs: i32) -> Self::Output {
-        self.clone() ^ rhs
+impl From<u32> for Expr {
+    fn from(value: u32) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
 
-impl BitXor<f32> for &Expression {
-    type Output = Expression;
-
-    fn bitxor(self, rhs: f32) -> Self::Output {
-        self.clone() ^ rhs
+impl From<u64> for Expr {
+    fn from(value: u64) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
-
-impl BitXor<f64> for &Expression {
-    type Output = Expression;
 
-    fn bitxor(self, rhs: f64) -> Self::Output {
-        self.clone() ^ rhs
+impl From<u128> for Expr {
+    fn from(value: u128) -> Self {
+        Expr::Val(i32::from(value))
     }
 }
 
-impl From<i16> for Expression {
-    fn from(value: i16) -> Self {
-        Expression::from(i32::from(value))
+impl From<isize> for Expr {
+    fn from(value: isize) -> Self {
+        Expr::Val(value as i32)
     }
 }
 
-impl From<i32> for Expression {
-    fn from(value: i32) -> Self {
-        Expression {
-            operation: Operation::Value(value),
-            lhs: None,
-            rhs: None,
-        }
+impl From<usize> for Expr {
+    fn from(value: usize) -> Self {
+        Expr::Val(value as i32)
     }
 }
 
-impl From<f32> for Expression {
+impl From<f32> for Expr {
     fn from(value: f32) -> Self {
         let denominator = 10_000_000;
-        let value = (value * (denominator as f32)) as i32;
-        let gcd = crate::utils::greatest_common_divisor(value, denominator);
+        let numerator = (value * (denominator as f32)) as isize;
 
-        Expression {
-            operation: Operation::Division,
-            lhs: Some(Box::new(Expression::from(value / gcd))),
-            rhs: Some(Box::new(Expression::from(denominator / gcd))),
+        let gcd = gcd(numerator, denominator);
+
+        let numerator = numerator / gcd;
+        let denominator = denominator / gcd;
+
+        if denominator == 1 {
+            Expr::from(numerator)
+        } else {
+            Expr::Div(
+                Box::new(
+                    Expr::from(numerator / gcd)
+                ),
+                Box::new(
+                    Expr::from(denominator / gcd)
+                )
+            )
         }
     }
 }
 
-impl From<f64> for Expression {
+impl From<f64> for Expr {
     fn from(value: f64) -> Self {
-        let denominator = 10_000_000;
-        let value = (value * f64::from(denominator)) as i32;
-        let gcd = crate::utils::greatest_common_divisor(value, denominator);
+        let denominator = 10_000_000_000;
+        let numerator = (value * (denominator as f64)) as isize;
 
-        Expression {
-            operation: Operation::Division,
-            lhs: Some(Box::new(Expression::from(value / gcd))),
-            rhs: Some(Box::new(Expression::from(denominator / gcd))),
+        let gcd = gcd(numerator, denominator);
+
+        let numerator = numerator / gcd;
+        let denominator = denominator / gcd;
+
+        if denominator == 1 {
+            Expr::from(numerator)
+        } else {
+            Expr::Div(
+                Box::new(
+                    Expr::from(numerator / gcd)
+                ),
+                Box::new(
+                    Expr::from(denominator / gcd)
+                )
+            )
         }
     }
 }
 
-impl PartialOrd for Expression {
+impl<T> From<&T> for Expr 
+    where T: Number {
+    fn from(value: &T) -> Self {
+        Expr::from(*value)
+    }
+}
+
+impl<T> Add<T> for Expr
+    where T: Number {
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self::Output {
+        Expr::Add(
+            Box::new(
+                self
+            ),
+            Box::new(
+                Expr::from(rhs)
+            )
+        )
+    }
+}
+
+impl Add<Expr> for i8 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for i16 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for i32 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for i64 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for i128 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for u8 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for u16 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for u32 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for u64 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for u128 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for f32 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl Add<Expr> for f64 {
+    type Output = Expr;
+
+    fn add(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) + rhs
+    }
+}
+
+impl<T> Sub<T> for Expr
+    where T: Number {
+    type Output = Self;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        Expr::Sub(
+            Box::new(
+                self
+            ),
+            Box::new(
+                Expr::from(rhs)
+            )
+        )
+    }
+}
+
+impl Sub<Expr> for i8 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for i16 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for i32 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for i64 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for i128 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for u8 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for u16 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for u32 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for u64 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for u128 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for f32 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl Sub<Expr> for f64 {
+    type Output = Expr;
+
+    fn sub(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) - rhs
+    }
+}
+
+impl<T> Mul<T> for Expr
+    where T: Number {
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let rhs = Expr::from(rhs);
+
+        if let Expr::Val(x) = self {
+            if x == 1 {
+                return rhs;
+            }
+        }
+
+        if let Expr::Val(x) = rhs {
+            if x == 1 {
+                return self;
+            }
+        }
+
+        Expr::Mul(
+            Box::new(
+                self
+            ),
+            Box::new(
+                rhs
+            )
+        )
+    }
+}
+
+
+impl Mul<Expr> for i8 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for i16 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for i32 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for i64 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for i128 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for u8 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for u16 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for u32 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for u64 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for u128 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for f32 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl Mul<Expr> for f64 {
+    type Output = Expr;
+
+    fn mul(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) * rhs
+    }
+}
+
+impl<T> Div<T> for Expr
+    where T: Number {
+    type Output = Self;
+
+    fn div(self, rhs: T) -> Self::Output {
+        let rhs = Expr::from(rhs);
+
+        if let Expr::Val(x) = rhs {
+            if x == 1 {
+                return self;
+            } else {
+                if let Expr::Val(y) = self {
+                    let gcd = gcd(x as isize, y as isize);
+
+                    return Expr::Div(
+                        Box::new(
+                            Expr::from(y / (gcd as i32))
+                        ),
+                        Box::new(
+                            Expr::from(x / (gcd as i32))
+                        )
+                    );
+                }
+            }
+        }
+
+        Expr::Div(
+            Box::new(
+                self
+            ),
+            Box::new(
+                rhs
+            )
+        )
+    }
+}
+
+impl Div<Expr> for i8 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for i16 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for i32 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for i64 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for i128 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for u8 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for u16 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for u32 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for u64 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for u128 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for f32 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl Div<Expr> for f64 {
+    type Output = Expr;
+
+    fn div(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) / rhs
+    }
+}
+
+impl<T> Rem<T> for Expr
+    where T: Number {
+    type Output = Self;
+
+    fn rem(self, rhs: T) -> Self::Output {
+        Expr::Rem(
+            Box::new(
+                self
+            ),
+            Box::new(
+                Expr::from(rhs)
+            )
+        )
+    }
+}
+
+impl Rem<Expr> for i8 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for i16 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for i32 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for i64 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for i128 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for u8 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for u16 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for u32 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for u64 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for u128 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for f32 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl Rem<Expr> for f64 {
+    type Output = Expr;
+
+    fn rem(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) % rhs
+    }
+}
+
+impl<T> BitXor<T> for Expr
+    where T: Number {
+    type Output = Self;
+
+    fn bitxor(self, rhs: T) -> Self::Output
+        where precise::expression::Expr: std::convert::From<T> {
+        let rhs = Expr::from(rhs);
+
+        if let Expr::Val(x) = self {
+            if x == 0 {
+                return Expr::from(x);
+            }
+        }
+
+        if let Expr::Val(x) = rhs {
+            if x == 1 {
+                return self;
+            }
+        }
+
+        Expr::Exp(
+            Box::new(
+                self
+            ),
+            Box::new(
+                rhs
+            )
+        )
+    }
+}
+
+impl BitXor<Expr> for i8 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for i16 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for i32 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for i64 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for i128 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for u8 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for u16 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for u32 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for u64 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for u128 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for f32 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl BitXor<Expr> for f64 {
+    type Output = Expr;
+
+    fn bitxor(self, rhs: Expr) -> Self::Output {
+        Expr::from(self) ^ rhs
+    }
+}
+
+impl<T> PartialEq<T> for Expr 
+    where T: Number {
+    fn eq(&self, rhs: &T) -> bool {
+        self.eval() == Expr::from(rhs).eval()
+    }
+}
+
+impl Eq for Expr {}
+
+impl PartialOrd for Expr {
     fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
-        let lhs = self.evaluate();
-        let rhs = rhs.evaluate();
+        let lhs = self.eval();
+        let rhs = rhs.eval();
 
         if lhs < rhs {
             Some(Ordering::Less)
@@ -832,10 +920,10 @@ impl PartialOrd for Expression {
     }
 }
 
-impl Ord for Expression {
+impl Ord for Expr {
     fn cmp(&self, rhs: &Self) -> Ordering {
-        let lhs = self.evaluate();
-        let rhs = rhs.evaluate();
+        let lhs = self.eval();
+        let rhs = rhs.eval();
 
         if lhs < rhs {
             Ordering::Less
@@ -847,397 +935,123 @@ impl Ord for Expression {
     }
 }
 
-impl PartialEq for Expression {
-    fn eq(&self, rhs: &Self) -> bool {
-        self.evaluate() == rhs.evaluate()
-    }
-}
-
-impl PartialEq<Expression> for &Expression {
-    fn eq(&self, rhs: &Expression) -> bool {
-        self.evaluate() == rhs.evaluate()
-    }
-}
-
-impl PartialEq<&Expression> for Expression {
-    fn eq(&self, rhs: &&Expression) -> bool {
-        self.evaluate() == rhs.evaluate()
-    }
-}
-
-impl PartialEq<i16> for Expression {
-    fn eq(&self, rhs: &i16) -> bool {
-        self.evaluate() == f64::from(*rhs)
-    }
-}
-
-impl PartialEq<i32> for Expression {
-    fn eq(&self, rhs: &i32) -> bool {
-        self.evaluate() == f64::from(*rhs)
-    }
-}
-
-impl PartialEq<f32> for Expression {
-    fn eq(&self, rhs: &f32) -> bool {
-        self.evaluate() == f64::from(*rhs)
-    }
-}
-
-impl PartialEq<f64> for Expression {
-    fn eq(&self, rhs: &f64) -> bool {
-        self.evaluate() == *rhs
-    }
-}
-
-impl Eq for Expression {}
-
-impl Display for Expression {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self.operation {
-            Operation::Value(x) => write!(f, "{}", x),
-            Operation::Addition => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        write!(f, "({} + {})", lhs, rhs)
-                    } else {
-                        write!(f, "")
-                    }
-                } else {
-                    write!(f, "")
-                }
-            },
-            Operation::Subtraction => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        write!(f, "({} - {})", lhs, rhs)
-                    } else {
-                        write!(f, "")
-                    }
-                } else {
-                    write!(f, "")
-                }
-            },
-            Operation::Multiplication => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        write!(f, "({} * {})", lhs, rhs)
-                    } else {
-                        write!(f, "")
-                    }
-                } else {
-                    write!(f, "")
-                }
-            },
-            Operation::Division => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        write!(f, "({} / {})", lhs, rhs)
-                    } else {
-                        write!(f, "")
-                    }
-                } else {
-                    write!(f, "")
-                }
-            },
-            Operation::Modulus => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        write!(f, "({} % {})", lhs, rhs)
-                    } else {
-                        write!(f, "")
-                    }
-                } else {
-                    write!(f, "")
-                }
-            },
-            Operation::Exponent => {
-                if let Some(lhs) = &self.lhs {
-                    if let Some(rhs) = &self.rhs {
-                        write!(f, "({} ^ {})", lhs, rhs)
-                    } else {
-                        write!(f, "")
-                    }
-                } else {
-                    write!(f, "")
-                }
-            },
+impl fmt::Display for Expr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Expr::Val(x) => write!(f, "{}", x),
+            Expr::Add(x, y) => write!(f, "({} + {})", x, y),
+            Expr::Sub(x, y) => write!(f, "({} - {})", x, y),
+            Expr::Mul(x, y) => write!(f, "({} * {})", x, y),
+            Expr::Div(x, y) => write!(f, "({} / {})", x, y),
+            Expr::Rem(x, y) => write!(f, "({} % {})", x, y),
+            Expr::Exp(x, y) => write!(f, "({} ^ {})", x, y),
         }
-    }    
+    }
 }
 
+pub fn gcd(numerator: isize, denominator: isize) -> isize {
+    let mut a = numerator;
+    let mut b = denominator;
+
+    while b != 0 {
+        let temp = b;
+        b = a % b;
+        a = temp;
+    }
+
+    a
+}
+
+fn main() {
+    let expr = 
+        Expr::from(3) + 
+        Expr::from(6) + 
+        Expr::from(2) * 
+        Expr::from(56) - 
+        Expr::from(3) / 
+        Expr::from(15) + 
+        Expr::from(12);
+    println!("{} = {}", expr, expr.eval());
+}
+
+
 #[cfg(test)]
-mod operation_tests {
-    use super::Operation;
+mod tests {
+    use super::Expr;
 
     #[test]
     fn from_i16() {
-        let result = Operation::from(3_i16);
-        let expected_result = Operation::Value(3_i32);
+        let result = Expr::from(3_i16);
+        let expected_result = Expr::Val(3);
 
         assert_eq!(result, expected_result);
     }
 
     #[test]
     fn from_i32() {
-        let result = Operation::from(3_i32);
-        let expected_result = Operation::Value(3_i32);
-
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn eq_value_value() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::from(0);
-
-        assert_eq!(op1, op2);
-    }
-
-    #[test]
-    fn ne_value_value() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::from(1);
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_value_addition() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::Addition;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_value_subtraction() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::Subtraction;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_value_multiplication() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::Multiplication;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_value_division() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::Division;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_value_modulus() {
-        let op1 = Operation::from(0);
-        let op2 = Operation::Modulus;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn eq_addition_addition() {
-        let op1 = Operation::Addition;
-        let op2 = Operation::Addition;
-
-        assert_eq!(op1, op2);
-    }
-
-    #[test]
-    fn ne_addition_subtraction() {
-        let op1 = Operation::Addition;
-        let op2 = Operation::Subtraction;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_addition_multiplication() {
-        let op1 = Operation::Addition;
-        let op2 = Operation::Multiplication;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_addition_division() {
-        let op1 = Operation::Addition;
-        let op2 = Operation::Division;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_addition_modulus() {
-        let op1 = Operation::Addition;
-        let op2 = Operation::Modulus;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn eq_subtraction_subtraction() {
-        let op1 = Operation::Subtraction;
-        let op2 = Operation::Subtraction;
-
-        assert_eq!(op1, op2);
-    }
-
-    #[test]
-    fn ne_subtraction_multiplication() {
-        let op1 = Operation::Subtraction;
-        let op2 = Operation::Multiplication;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_subtraction_division() {
-        let op1 = Operation::Subtraction;
-        let op2 = Operation::Division;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_subtraction_modulus() {
-        let op1 = Operation::Subtraction;
-        let op2 = Operation::Modulus;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn eq_multiplication_multiplication() {
-        let op1 = Operation::Multiplication;
-        let op2 = Operation::Multiplication;
-
-        assert_eq!(op1, op2);
-    }
-
-    #[test]
-    fn ne_multiplication_division() {
-        let op1 = Operation::Multiplication;
-        let op2 = Operation::Division;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn ne_multiplication_modulus() {
-        let op1 = Operation::Multiplication;
-        let op2 = Operation::Modulus;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn eq_division_division() {
-        let op1 = Operation::Division;
-        let op2 = Operation::Division;
-
-        assert_eq!(op1, op2);
-    }
-
-    #[test]
-    fn ne_division_modulus() {
-        let op1 = Operation::Division;
-        let op2 = Operation::Modulus;
-
-        assert_ne!(op1, op2);
-    }
-
-    #[test]
-    fn eq_modulus_modulus() {
-        let op1 = Operation::Modulus;
-        let op2 = Operation::Modulus;
-
-        assert_eq!(op1, op2);
-    }
-}
-
-#[cfg(test)]
-mod expr_tests {
-    use super::Expression;
-    use super::Operation;
-
-    #[test]
-    fn from_i16() {
-        let result = Expression::from(3_i16);
-        let expected_result = Expression {
-            operation: Operation::Value(3),
-            lhs: None,
-            rhs: None,
-        };
-
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn from_i32() {
-        let result = Expression::from(3_i32);
-        let expected_result = Expression {
-            operation: Operation::Value(3),
-            lhs: None,
-            rhs: None,
-        };
+        let result = Expr::from(3_i32);
+        let expected_result = Expr::Val(3);
 
         assert_eq!(result, expected_result);
     }
 
     #[test]
     fn from_f32() {
-        let result = Expression::from(3.2_f32);
-        let expected_result = Expression {
-            operation: Operation::Division,
-            lhs: Some(Box::new(Expression::from(16))),
-            rhs: Some(Box::new(Expression::from(5))),
-        };
+        let result = Expr::from(3.2_f32);
+        let expected_result = Expr::Div(
+            Box::new(
+                Expr::from(16)
+            ), Box::new(
+                Expr::from(5)
+            )
+        );
 
         assert_eq!(result, expected_result);
     }
 
     #[test]
     fn from_f64() {
-        let result = Expression::from(3.2_f64);
-        let expected_result = Expression {
-            operation: Operation::Division,
-            lhs: Some(Box::new(Expression::from(16))),
-            rhs: Some(Box::new(Expression::from(5))),
-        };
+        let result = Expr::from(3.2_f64);
+        let expected_result = Expr::Div(
+            Box::new(
+                Expr::from(16)
+            ), Box::new(
+                Expr::from(5)
+            )
+        );
 
         assert_eq!(result, expected_result);
     }
 
     #[test]
     fn evaluate() {
-        let test_expression: Expression = Expression::from(3) + 2 - Expression::from(0.5) / 5 * 2; 
+        let test_expression: Expr = (5 * (Expr::from(3) + 2 - Expr::from(0.5) / 5 * 2) / 31 + 55) / 23; 
 
-        let result = test_expression.evaluate();
-        let expected_result = 5.0 - 1.0 / 5.0;
+        let result = test_expression.eval();
+        let expected_result = ((5.0 * (5.0 - 1.0 / 5.0)) / 31.0 + 55.0) / 23.0;
 
         assert_eq!(result, expected_result);
+/*
+        let test_expression2: Expr = Expr::from(3) * (1 / (((Expr::from(3) ^ 2) + (Expr::from(4) ^ 2)) ^ 0.5));
+        
+        let result2 = test_expression2.eval();
+        let expected_result2 = 0.6;
+
+        assert_eq!(result2, expected_result2);
+
+        let test_expression3: Expr = Expr::from(3) / (((Expr::from(3) ^ 2) + (Expr::from(4) ^ 2)) ^ 0.5);
+
+        let result3 = test_expression3.eval();
+        let expected_result3 = 0.6;
+
+        assert_eq!(result3, expected_result3);
+        */
     }
 
     #[test]
     fn add() {
-        let lhs = Expression {
-            operation: Operation::Value(5),
-            lhs: None,
-            rhs: None,
-        };
-
-        let rhs = Expression {
-            operation: Operation::Value(16),
-            lhs: None,
-            rhs: None,
-        };
+        let lhs = Expr::from(5);
+        let rhs = Expr::from(16);
 
         let result = lhs + rhs;
         let expected_result = 21;
@@ -1247,17 +1061,8 @@ mod expr_tests {
 
     #[test]
     fn sub() {
-        let lhs = Expression {
-            operation: Operation::Value(5),
-            lhs: None,
-            rhs: None,
-        };
-
-        let rhs = Expression {
-            operation: Operation::Value(16),
-            lhs: None,
-            rhs: None,
-        };
+        let lhs = Expr::from(5);
+        let rhs = Expr::from(16);
 
         let result = lhs - rhs;
         let expected_result = -11;
@@ -1267,17 +1072,8 @@ mod expr_tests {
 
     #[test]
     fn mul() {
-        let lhs = Expression {
-            operation: Operation::Value(5),
-            lhs: None,
-            rhs: None,
-        };
-
-        let rhs = Expression {
-            operation: Operation::Value(16),
-            lhs: None,
-            rhs: None,
-        };
+        let lhs = Expr::from(5);
+        let rhs = Expr::from(16);
 
         let result = lhs * rhs;
         let expected_result = 80;
@@ -1287,17 +1083,8 @@ mod expr_tests {
 
     #[test]
     fn div() {
-        let lhs = Expression {
-            operation: Operation::Value(5),
-            lhs: None,
-            rhs: None,
-        };
-
-        let rhs = Expression {
-            operation: Operation::Value(16),
-            lhs: None,
-            rhs: None,
-        };
+        let lhs = Expr::from(5);
+        let rhs = Expr::from(16);
 
         let result = lhs / rhs;
         let expected_result = 5.0 / 16.0;
@@ -1307,17 +1094,8 @@ mod expr_tests {
 
     #[test]
     fn rem() {
-        let lhs = Expression {
-            operation: Operation::Value(5),
-            lhs: None,
-            rhs: None,
-        };
-
-        let rhs = Expression {
-            operation: Operation::Value(16),
-            lhs: None,
-            rhs: None,
-        };
+        let lhs = Expr::from(5);
+        let rhs = Expr::from(16);
 
         let result = lhs % rhs;
         let expected_result = 5 % 16;
@@ -1327,7 +1105,7 @@ mod expr_tests {
     
     #[test]
     fn pow() {
-        let result = Expression::from(5) ^ Expression::from(16);
+        let result = Expr::from(5) ^ Expr::from(16);
         let expected_result = 5_f64.powf(16.0);
 
         assert_eq!(result, expected_result);
