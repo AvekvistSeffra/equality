@@ -55,7 +55,7 @@ impl Vector2 {
     }
 
     pub fn norm(&self) -> Expr {
-        ((*self.x() ^ 2) + (*self.y() ^ 2)) ^ 0.5
+        ((self.x().clone() ^ 2) + (self.y().clone() ^ 2)) ^ 0.5
     }
 
     pub fn normalize(self) -> Vector2 {
